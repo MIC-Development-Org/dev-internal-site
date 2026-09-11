@@ -36,7 +36,7 @@ export function CountdownClock({ deadlineIso }: { deadlineIso: string }) {
       {!remaining ? (
         <span className="text-sm font-bold tabular-nums">--:--:--</span>
       ) : expired ? (
-        <span className="text-sm font-semibold tracking-wider">CHEQUERED FLAG</span>
+        <span className="text-sm font-semibold tracking-wider">🏁 CLOSED</span>
       ) : (
         <>
           <span className="text-sm font-bold tabular-nums">{remaining.days}d</span>

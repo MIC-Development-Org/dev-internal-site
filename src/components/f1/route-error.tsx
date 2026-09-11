@@ -29,13 +29,14 @@ export function RouteError({ error, reset }: { error: Error & { digest?: string 
         </svg>
       </div>
       <div className="space-y-1">
-        <p className="text-base font-semibold text-foreground">Retirement.</p>
+        <p className="text-base font-semibold text-foreground">Something went wrong.</p>
         <p className="max-w-sm text-sm text-muted-foreground">
-          Something failed in this sector. Box, box — try again.
+          This section failed to load. Try again.
         </p>
+        <p className="text-xs uppercase tracking-widest text-destructive/70">Retirement — box, box.</p>
       </div>
       <Button onClick={reset} variant="outline" size="sm">
-        Restart engine
+        Try Again
       </Button>
     </div>
   );

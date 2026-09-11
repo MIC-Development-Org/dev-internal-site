@@ -12,6 +12,30 @@ import { isDeadlinePassed } from "@/lib/deadline";
 
 export type ActionState = { error?: string; success?: boolean };
 
+export type TeammateLookup =
+  | { found: false }
+  | { found: true; name: string; role: string; photoUrl?: string; onAnotherTeam: boolean };
+
+export async function lookupTeammate(email: string): Promise<TeammateLookup> {
+  await requireUser();
+  await connectToDatabase();
+
+  const normalized = email.trim().toLowerCase();
+  const user = await UserModel.findOne({ email: normalized })
+    .select("name role photoUrl teamId")
+    .lean();
+
+  if (!user) return { found: false };
+
+  return {
+    found: true,
+    name: user.name,
+    role: user.role,
+    photoUrl: user.photoUrl,
+    onAnotherTeam: Boolean(user.teamId),
+  };
+}
+
 export async function createTeam(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser();
   await connectToDatabase();
