@@ -32,22 +32,24 @@ export default async function TeamPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Team Formation</h1>
-            <p className="text-sm text-muted-foreground">Build your constructor before lights out.</p>
+            <p className="text-sm text-muted-foreground">
+              Create your team and add your teammates before team formation closes.
+            </p>
           </div>
           {deadline && <CountdownClock deadlineIso={deadline.toISOString()} />}
         </div>
 
         {closed ? (
           <EmptyState
-            title="No garage yet."
+            title="You haven't joined a team yet."
             description="Team formation is closed. Ask an admin to assign you to a team."
           />
         ) : (
           <Card className="max-w-xl">
             <CardHeader>
-              <CardTitle>Form your constructor</CardTitle>
+              <CardTitle>Create your team</CardTitle>
               <CardDescription>
-                Name your team and pull in your teammates by their VIT email.
+                Name your team and add your teammates by their VIT email.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -72,7 +74,7 @@ export default async function TeamPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{team.name}</h1>
-          <p className="text-sm text-muted-foreground">Your constructor roster.</p>
+          <p className="text-sm text-muted-foreground">Your team members.</p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold tabular-nums">{team.points}</p>
@@ -82,7 +84,7 @@ export default async function TeamPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Roster ({team.members.length})</CardTitle>
+          <CardTitle>Team members ({team.members.length})</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {team.members.map((member) => (
@@ -118,7 +120,7 @@ export default async function TeamPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No laps completed yet — head to My Project to submit.
+              No project submitted yet — head to My Project to submit yours.
             </p>
           )}
         </CardContent>

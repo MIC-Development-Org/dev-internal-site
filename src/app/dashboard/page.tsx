@@ -11,7 +11,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Welcome back, {profile.name.split(" ")[0]}</h1>
-        <p className="text-sm text-muted-foreground">Here&apos;s where things stand in the paddock.</p>
+        <p className="text-sm text-muted-foreground">Here&apos;s your development department overview.</p>
       </div>
 
       <DashboardOverview
