@@ -15,8 +15,20 @@ export async function getDirectory(filter?: { role?: UserRole; search?: string }
   if (filter?.role) query.role = filter.role;
   if (filter?.search) query.name = { $regex: filter.search, $options: "i" };
 
-  const users = await UserModel.find(query).sort({ name: 1 }).select("_id name photoUrl role batch").lean();
-  return users.map((u) => ({ ...u, _id: String(u._id) }));
+  const [users, teams] = await Promise.all([
+    UserModel.find(query)
+      .sort({ name: 1 })
+      .select("_id name photoUrl role batch email techStack teamId")
+      .lean(),
+    TeamModel.find().select("_id name").lean(),
+  ]);
+  const teamNames = new Map(teams.map((t) => [String(t._id), t.name]));
+
+  return users.map((u) => ({
+    ...u,
+    _id: String(u._id),
+    teamName: u.teamId ? (teamNames.get(String(u.teamId)) ?? null) : null,
+  }));
 }
 
 export async function getAllUsersForAdmin() {
