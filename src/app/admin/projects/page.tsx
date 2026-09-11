@@ -24,13 +24,13 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
         </Button>
         {PROJECT_STATUSES.map((s) => (
           <Button key={s} type="submit" name="status" value={s} variant={status === s ? "default" : "outline"} size="sm">
-            {s.replace("_", " ")}
+            {s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </Button>
         ))}
       </form>
 
       {projects.length === 0 ? (
-        <EmptyState title="No laps completed yet" description="No projects match this filter." />
+        <EmptyState title="No projects yet" description="No projects match this filter." />
       ) : (
         <div className="space-y-3">
           {projects.map((p) => (
