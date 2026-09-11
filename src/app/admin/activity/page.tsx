@@ -27,7 +27,7 @@ export default async function AdminActivityPage() {
       </div>
 
       {logs.length === 0 ? (
-        <EmptyState title="No laps completed yet" description="No admin actions have been logged yet." />
+        <EmptyState title="No activity yet" description="No admin actions have been logged yet." />
       ) : (
         <Card>
           <CardContent className="divide-y divide-border pt-6">

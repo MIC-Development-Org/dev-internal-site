@@ -12,7 +12,7 @@ export default async function AdminTeamsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Team Management</h1>
-        <p className="text-sm text-muted-foreground">{teams.length} constructors on the grid.</p>
+        <p className="text-sm text-muted-foreground">{teams.length} teams created.</p>
       </div>
 
       {unassigned.length > 0 && (
@@ -33,7 +33,7 @@ export default async function AdminTeamsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-3">
           {teams.length === 0 ? (
-            <EmptyState title="No garages yet." description="No teams have been created." />
+            <EmptyState title="No teams yet." description="No teams have been created." />
           ) : (
             teams.map((team) => {
               const seniors = countSeniors(team.members);

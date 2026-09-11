@@ -26,7 +26,7 @@ export default async function AdminTeamDetailPage({ params }: PageProps<"/admin/
 
       <Card>
         <CardHeader>
-          <CardTitle>Roster</CardTitle>
+          <CardTitle>Team members</CardTitle>
         </CardHeader>
         <CardContent>
           <EditTeamForm
