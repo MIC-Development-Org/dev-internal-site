@@ -18,8 +18,8 @@ export default async function ShowcasePage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Showcase</h1>
-        <p className="text-sm text-muted-foreground">Approved and completed projects from across the grid.</p>
+        <h1 className="text-2xl font-bold">Projects</h1>
+        <p className="text-sm text-muted-foreground">Explore projects built by the MIC Development Department.</p>
       </div>
 
       <form className="flex flex-wrap items-center gap-2" method="get">
@@ -35,7 +35,7 @@ export default async function ShowcasePage({
       </form>
 
       {projects.length === 0 ? (
-        <EmptyState title="No laps completed yet" description="No approved projects to show yet." />
+        <EmptyState title="No projects to display yet" description="Approved projects will appear here." />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p) => (
