@@ -27,7 +27,7 @@ export default async function MemberProfilePage({ params }: PageProps<"/dashboar
             </div>
             {profile.batch && <p className="text-sm text-muted-foreground">{profile.batch}</p>}
             <p className="text-sm text-muted-foreground">
-              {profile.teamName ? `Team: ${profile.teamName}` : "No garage yet."}
+              {profile.teamName ? `Team: ${profile.teamName}` : "Not part of a team yet"}
             </p>
           </div>
           <div className="ml-auto flex items-center gap-3">

@@ -16,9 +16,12 @@ type Member = {
   photoUrl?: string;
   role: UserRole;
   batch?: string;
+  email?: string;
+  techStack?: string[];
+  teamName?: string | null;
 };
 
-// Deterministic color generation for avatar backgrounds based on F1 team colors
+// Deterministic color generation for avatar backgrounds, based on F1 team colors
 function getAvatarColor(name: string) {
   const colors = [
     "bg-red-600 text-white",      // Ferrari red
@@ -46,8 +49,8 @@ function extractNameAndId(fullName: string) {
   return { name: fullName.trim(), id: null };
 }
 
-// F1 "Driver Number" based on ID hash
-function getDriverNumber(id: string) {
+// Decorative member number (like a racing number), derived from the member's id
+function getMemberNumber(id: string) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -57,30 +60,33 @@ function getDriverNumber(id: string) {
 
 function MemberCard({ member }: { member: Member }) {
   const { name, id } = extractNameAndId(member.name);
-  const driverNumber = getDriverNumber(member._id);
+  const memberNumber = getMemberNumber(member._id);
   const avatarColor = getAvatarColor(name);
-  
-  const bgImage = member.role === "lead" || member.role === "admin" 
-    ? "/img1.png" 
-    : member.role === "senior" 
-      ? "/img2.png" 
+  const techStack = member.techStack ?? [];
+  const visibleTech = techStack.slice(0, 3);
+  const extraTech = techStack.length - visibleTech.length;
+
+  const bgImage = member.role === "lead" || member.role === "admin"
+    ? "/img1.png"
+    : member.role === "senior"
+      ? "/img2.png"
       : "/img3.png";
 
   return (
     <Link href={`/dashboard/directory/${member._id}`} className="block group h-full">
       <Card className="relative overflow-hidden transition-all duration-150 hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:border-red-500/50 bg-black border-zinc-800 h-full">
-        
-        {/* Background Driver Image */}
+
+        {/* Background member image */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden mix-blend-lighten">
            {/* eslint-disable-next-line @next/next/no-img-element */}
            <img src={bgImage} alt="" className="w-full h-full object-cover object-top opacity-30 group-hover:opacity-50 transition-opacity duration-500 animate-smoke" />
         </div>
 
-        {/* Driver Number overlay */}
+        {/* Decorative member number overlay */}
         <div className="absolute top-0 right-0 p-3 opacity-20 font-mono text-4xl font-black italic tracking-tighter pointer-events-none group-hover:text-red-500 group-hover:opacity-40 transition-colors z-0">
-          {driverNumber}
+          {memberNumber}
         </div>
-        
+
         <CardContent className="relative z-10 flex flex-col justify-between gap-4 p-5 h-full">
           <div className="flex items-start justify-between">
             <Avatar className={cn("h-14 w-14 rounded-md border-b-2 border-r-2 border-zinc-800 shadow-xl", avatarColor)}>
@@ -91,17 +97,38 @@ function MemberCard({ member }: { member: Member }) {
             </Avatar>
             <RoleBadge role={member.role} />
           </div>
-          
-          <div className="flex flex-col gap-1 mt-4">
-            <h3 className="font-bold text-lg leading-tight truncate pr-8 drop-shadow-md text-white">{name}</h3>
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xs text-zinc-300 uppercase drop-shadow-md">
-                {id ? id : "NO ID"}
-              </span>
-              <span className="font-mono text-[10px] bg-zinc-900/80 px-2 py-0.5 text-zinc-300 border border-zinc-700 backdrop-blur-sm">
-                SEASON {member.batch ? member.batch : "N/A"}
-              </span>
+
+          <div className="flex flex-col gap-2 mt-4">
+            <div className="flex flex-col gap-1">
+              <h3 className="font-bold text-lg leading-tight truncate pr-8 drop-shadow-md text-white">{name}</h3>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-zinc-300 uppercase drop-shadow-md">
+                  {id ? id : "NO ID"}
+                </span>
+                <span className="font-mono text-[10px] bg-zinc-900/80 px-2 py-0.5 text-zinc-300 border border-zinc-700 backdrop-blur-sm">
+                  BATCH {member.batch ? member.batch : "N/A"}
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 truncate">
+                {member.teamName ? `Team: ${member.teamName}` : "No team yet"}
+              </p>
             </div>
+
+            {visibleTech.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {visibleTech.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-sm border border-zinc-700 bg-zinc-900/80 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300"
+                  >
+                    {t}
+                  </span>
+                ))}
+                {extraTech > 0 && (
+                  <span className="font-mono text-[10px] text-zinc-500">+{extraTech}</span>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -111,12 +138,12 @@ function MemberCard({ member }: { member: Member }) {
 
 function Section({ title, count, members }: { title: string; count: number; members: Member[] }) {
   if (members.length === 0) return null;
-  
+
   return (
     <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-baseline justify-between border-b-2 border-red-500/80 pb-1">
         <h2 className="font-mono text-xl font-bold tracking-tight uppercase drop-shadow-md">{title}</h2>
-        <span className="font-mono text-xs text-red-400 drop-shadow-md">{count} DRIVER{count !== 1 ? 'S' : ''}</span>
+        <span className="font-mono text-xs text-red-400 drop-shadow-md">{count} MEMBER{count !== 1 ? 'S' : ''}</span>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {members.map((m) => (
@@ -132,8 +159,13 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
   const [activeTab, setActiveTab] = useState<UserRole | "all">("all");
 
   const filteredMembers = useMemo(() => {
+    const q = search.trim().toLowerCase();
     return initialMembers.filter((m) => {
-      const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch =
+        q === "" ||
+        m.name.toLowerCase().includes(q) ||
+        (m.email?.toLowerCase().includes(q) ?? false) ||
+        (m.techStack?.some((t) => t.toLowerCase().includes(q)) ?? false);
       const matchesRole = activeTab === "all" || m.role === activeTab || (activeTab === "lead" && m.role === "admin");
       return matchesSearch && matchesRole;
     });
@@ -145,7 +177,7 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
 
   return (
     <div className="relative space-y-8 pb-12 min-h-[calc(100vh-2rem)]">
-      {/* Directory Background */}
+      {/* Decorative background */}
       <div className="absolute inset-0 z-0 pointer-events-none -mx-8 -mt-8 -mb-12 overflow-hidden rounded-xl bg-black">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/bg.jpeg" alt="" className="w-full h-full object-cover opacity-30 mix-blend-screen" />
@@ -153,17 +185,17 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
 
       <div className="flex flex-col gap-1 relative z-10 pt-4 px-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-black italic tracking-tighter uppercase font-mono">Pit Lane Directory</h1>
-          <span className="bg-red-500 text-white font-mono text-xs px-2 py-0.5 rounded-sm">{initialMembers.length} ROSTERED</span>
+          <h1 className="text-3xl font-black italic tracking-tighter uppercase font-mono">Members</h1>
+          <span className="bg-red-500 text-white font-mono text-xs px-2 py-0.5 rounded-sm">{initialMembers.length} MEMBERS</span>
         </div>
-        <p className="text-sm text-zinc-400">Team principals, drivers, and junior academy members.</p>
+        <p className="text-sm text-zinc-400">Find members of the MIC Development Department.</p>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-zinc-900/50 p-2 rounded-lg border border-zinc-800 relative z-10 px-2">
         <div className="relative w-full sm:max-w-xs">
           <Input
             type="search"
-            placeholder="Search roster..."
+            placeholder="Search by name, email or technology..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-black border-zinc-700 font-mono focus-visible:ring-red-500"
@@ -185,7 +217,7 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
             onClick={() => setActiveTab("lead")}
             className={cn("font-mono text-xs rounded-md", activeTab === "lead" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
           >
-            PRINCIPALS
+            TEAM LEADS
           </Button>
           <Button
             variant={activeTab === "senior" ? "default" : "ghost"}
@@ -193,7 +225,7 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
             onClick={() => setActiveTab("senior")}
             className={cn("font-mono text-xs rounded-md", activeTab === "senior" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
           >
-            DRIVERS
+            SENIOR MEMBERS
           </Button>
           <Button
             variant={activeTab === "fresher" ? "default" : "ghost"}
@@ -201,7 +233,7 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
             onClick={() => setActiveTab("fresher")}
             className={cn("font-mono text-xs rounded-md", activeTab === "fresher" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
           >
-            JUNIORS
+            JUNIOR MEMBERS
           </Button>
         </div>
       </div>
@@ -209,14 +241,14 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
       {filteredMembers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-800 rounded-xl bg-zinc-950 relative z-10 mx-2">
           <div className="text-4xl mb-4">🏁</div>
-          <h3 className="font-mono text-xl text-zinc-300 uppercase tracking-widest font-bold">In The Pit Box</h3>
-          <p className="text-zinc-500 text-sm mt-2">No matching drivers found for your telemetry.</p>
+          <h3 className="font-mono text-xl text-zinc-300 uppercase tracking-widest font-bold">No members found</h3>
+          <p className="text-zinc-500 text-sm mt-2">Try a different name, email, or technology.</p>
         </div>
       ) : (
         <div className="space-y-12 relative z-10 px-2">
-          <Section title="Team Principals" count={leads.length} members={leads} />
-          <Section title="Drivers" count={seniors.length} members={seniors} />
-          <Section title="Junior Academy" count={freshers.length} members={freshers} />
+          <Section title="Team Leads" count={leads.length} members={leads} />
+          <Section title="Senior Members" count={seniors.length} members={seniors} />
+          <Section title="Junior Members" count={freshers.length} members={freshers} />
         </div>
       )}
     </div>
