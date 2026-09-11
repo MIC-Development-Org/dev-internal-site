@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Pit Lane — MIC Development Department",
-  description: "Team formation, project showcase, and the leaderboard for the MIC Development Department.",
+  description: "Team formation, project tracking, and the leaderboard for the MIC Development Department.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
