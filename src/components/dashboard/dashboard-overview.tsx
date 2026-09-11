@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { Users, FolderKanban, LayoutGrid, Trophy, BookUser, ArrowRight } from "lucide-react";
+import { Users, FolderKanban, LayoutGrid, Trophy, BookUser, ArrowRight, UserPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/role-badge";
 import { PodiumBadge } from "@/components/f1/podium-badge";
@@ -20,11 +21,11 @@ type DashboardProfile = {
 };
 
 const QUICK_LINKS = [
-  { href: "/dashboard/team", label: "My Team", description: "Roster & formation status", icon: Users },
-  { href: "/dashboard/project", label: "My Project", description: "Submission & progress", icon: FolderKanban },
-  { href: "/dashboard/showcase", label: "Showcase", description: "See every team's build", icon: LayoutGrid },
-  { href: "/dashboard/leaderboard", label: "Leaderboard", description: "Full standings", icon: Trophy },
-  { href: "/dashboard/directory", label: "Directory", description: "Find a member", icon: BookUser },
+  { href: "/dashboard/team", label: "My Team", description: "View your team members and team status", icon: Users },
+  { href: "/dashboard/project", label: "My Project", description: "Submit and track your project", icon: FolderKanban },
+  { href: "/dashboard/showcase", label: "Projects", description: "Explore projects from the department", icon: LayoutGrid },
+  { href: "/dashboard/leaderboard", label: "Leaderboard", description: "View department rankings", icon: Trophy },
+  { href: "/dashboard/directory", label: "Members", description: "Find members and their tech stacks", icon: BookUser },
 ];
 
 const container: Variants = {
@@ -84,7 +85,7 @@ export function DashboardOverview({ profile }: { profile: DashboardProfile }) {
                 <RoleBadge role={profile.role} />
               </div>
               <p className="text-sm text-muted-foreground">
-                {profile.teamName ? `Team: ${profile.teamName}` : "No team yet"}
+                {profile.teamName ? `Team: ${profile.teamName}` : "Team: Not assigned"}
               </p>
             </div>
             <div className="ml-auto flex items-center gap-3">
@@ -95,6 +96,18 @@ export function DashboardOverview({ profile }: { profile: DashboardProfile }) {
               </div>
             </div>
           </CardContent>
+          {!profile.teamName && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-primary/5 px-6 py-4">
+              <div>
+                <p className="text-sm font-medium">You&apos;re not part of a team yet.</p>
+                <p className="text-xs text-muted-foreground">Create a team or join one to get started.</p>
+              </div>
+              <Button render={<Link href="/dashboard/team" />} nativeButton={false} size="sm" className="gap-1.5">
+                <UserPlus className="size-4" />
+                Create / Join Team
+              </Button>
+            </div>
+          )}
         </Card>
       </motion.div>
 

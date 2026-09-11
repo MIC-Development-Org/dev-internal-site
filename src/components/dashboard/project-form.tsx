@@ -26,7 +26,7 @@ export function ProjectForm({ defaults }: { defaults?: Defaults }) {
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
-    if (state.success) toast.success("Project submitted.");
+    if (state.success) toast.success("Project submitted successfully.");
   }, [state]);
 
   return (

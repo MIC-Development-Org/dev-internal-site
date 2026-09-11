@@ -3,11 +3,11 @@ import type { ProjectStatus } from "@/models/Project";
 
 const LABELS: Record<ProjectStatus, string> = {
   submitted: "Submitted",
-  under_review: "Box, box, box",
+  under_review: "Under Review",
   approved: "Approved",
   changes_requested: "Changes Requested",
   in_progress: "In Progress",
-  completed: "Chequered Flag",
+  completed: "Completed",
 };
 
 const VARIANTS: Record<ProjectStatus, "default" | "secondary" | "outline" | "destructive"> = {
