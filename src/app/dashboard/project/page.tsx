@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { requireUser } from "@/lib/dal";
 import { getMyTeam } from "@/lib/data/teams";
 import { getProjectForTeam } from "@/lib/data/projects";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/f1/empty-state";
 import { ProjectStatusBadge } from "@/components/project-status-badge";
+import { ProjectProgressTracker } from "@/components/dashboard/project-progress-tracker";
 import { ProjectForm } from "@/components/dashboard/project-form";
 
 export default async function ProjectPage() {
@@ -15,8 +18,13 @@ export default async function ProjectPage() {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">My Project</h1>
         <EmptyState
-          title="No laps completed yet"
-          description="You need a team before you can submit a project."
+          title="No project submitted yet"
+          description="You need to be part of a team before you can submit a project."
+          action={
+            <Button render={<Link href="/dashboard/team" />} nativeButton={false} size="sm" variant="outline">
+              Go to My Team
+            </Button>
+          }
         />
       </div>
     );
@@ -32,10 +40,18 @@ export default async function ProjectPage() {
         {project && <ProjectStatusBadge status={project.status} />}
       </div>
 
+      {project && (
+        <Card>
+          <CardContent className="overflow-x-auto pt-6">
+            <ProjectProgressTracker status={project.status} />
+          </CardContent>
+        </Card>
+      )}
+
       {!isLeader && !project && (
         <EmptyState
-          title="Box, box, box"
-          description="Only your team leader can submit the project."
+          title="No project submitted yet"
+          description="Only your team leader can submit the project for your team."
         />
       )}
 
@@ -84,7 +100,7 @@ export default async function ProjectPage() {
       {project && project.feedback.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Feedback from Race Control</CardTitle>
+            <CardTitle>Review feedback</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {project.feedback

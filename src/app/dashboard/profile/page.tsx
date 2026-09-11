@@ -16,7 +16,7 @@ export default async function ProfilePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">My Profile</h1>
-        <p className="text-sm text-muted-foreground">How the paddock sees you.</p>
+        <p className="text-sm text-muted-foreground">How other members see you.</p>
       </div>
 
       <Card>
