@@ -3,16 +3,21 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, PanelLeftClose, PanelLeftOpen, LogOut } from "lucide-react";
+import { Menu, X, PanelLeftClose, PanelLeftOpen, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // `icon` is a pre-rendered element (not a component reference) because this
 // is a Client Component: a bare component type passed as a prop from a
 // Server Component layout can't cross the RSC boundary (only serializable
 // values and already-rendered elements/children can).
-export type NavItem = { href: string; label: string; icon: ReactNode };
+export type NavItem = { href: string; label: string; icon: ReactNode; exact?: boolean };
 
 const COLLAPSE_STORAGE_KEY = "pitlane-sidebar-collapsed";
 
@@ -116,7 +121,9 @@ export function AppShell({
 
         <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-3 py-2">
           {navItems.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            const active = item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
@@ -138,36 +145,33 @@ export function AppShell({
           })}
         </nav>
 
-        <div
-          className={cn(
-            "flex items-center gap-3 border-t border-white/10 px-4 py-3",
-            collapsed && "md:justify-center md:px-0"
-          )}
-        >
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={userPhoto} alt={userName} />
-            <AvatarFallback>{userName.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <span className={cn("flex-1 truncate text-sm text-neutral-300", collapsed && "md:hidden")}>
-            {userName}
-          </span>
-          <form action={signOutAction} className={cn(collapsed && "md:hidden")}>
-            <Button type="submit" variant="ghost" size="sm" className="text-neutral-300 hover:text-white">
-              Sign out
-            </Button>
-          </form>
-          {collapsed && (
-            <form action={signOutAction} className="hidden md:block">
-              <button
-                type="submit"
-                aria-label="Sign out"
-                title="Sign out"
-                className="rounded-md p-1.5 text-neutral-300 hover:bg-white/10 hover:text-white"
-              >
+        <div className="border-t border-white/10 px-2 py-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left outline-none hover:bg-white/10 data-popup-open:bg-white/10",
+                collapsed && "md:justify-center md:px-0"
+              )}
+            >
+              <Avatar className="h-8 w-8 shrink-0">
+                <AvatarImage src={userPhoto} alt={userName} />
+                <AvatarFallback>{userName.slice(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <span className={cn("flex-1 truncate text-sm text-neutral-300", collapsed && "md:hidden")}>
+                {userName}
+              </span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" sideOffset={8} className="w-56">
+              <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
+                <User className="size-4" />
+                My Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onClick={() => signOutAction()}>
                 <LogOut className="size-4" />
-              </button>
-            </form>
-          )}
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
 
