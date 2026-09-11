@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
 /**
- * A small top-down car silhouette that zips across the top of the screen
- * on every route change, standing in for a plain progress bar.
+ * A small F1 car that zips across the top of the screen on every route
+ * change, standing in for a plain progress bar.
  */
 export function RouteTransitionLoader() {
   const pathname = usePathname();
@@ -32,18 +32,11 @@ export function RouteTransitionLoader() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeIn" }}
           >
-            <svg
-              width="28"
-              height="14"
-              viewBox="0 0 28 14"
-              fill="none"
-              className="text-primary drop-shadow-[0_0_6px_var(--primary)]"
-            >
-              <rect x="2" y="5" width="20" height="4" rx="2" fill="currentColor" />
-              <rect x="8" y="2" width="8" height="4" rx="1.5" fill="currentColor" />
-              <circle cx="7" cy="11" r="2.5" fill="currentColor" />
-              <circle cx="19" cy="11" r="2.5" fill="currentColor" />
-            </svg>
+            <img
+              src="/images/f1-car-loader.png"
+              alt=""
+              className="h-7 w-auto drop-shadow-[0_0_6px_var(--primary)]"
+            />
           </motion.div>
         )}
       </AnimatePresence>
