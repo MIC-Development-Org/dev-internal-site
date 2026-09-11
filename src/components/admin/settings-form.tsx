@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { updateSettings } from "@/lib/actions/admin";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ export function SettingsForm({
   formationPhaseOpen: boolean;
 }) {
   const [state, action] = useActionState(updateSettings, {});
+  const [deadline, setDeadline] = useState(toLocalInputValue(deadlineIso));
+  const [phaseOpen, setPhaseOpen] = useState(formationPhaseOpen);
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
@@ -36,11 +38,17 @@ export function SettingsForm({
           id="teamFormationDeadline"
           name="teamFormationDeadline"
           type="datetime-local"
-          defaultValue={toLocalInputValue(deadlineIso)}
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
         />
       </div>
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="formationPhaseOpen" defaultChecked={formationPhaseOpen} />
+        <input
+          type="checkbox"
+          name="formationPhaseOpen"
+          checked={phaseOpen}
+          onChange={(e) => setPhaseOpen(e.target.checked)}
+        />
         Team formation phase is open
       </label>
       <SubmitButton pendingLabel="Saving...">Save settings</SubmitButton>

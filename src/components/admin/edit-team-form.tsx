@@ -25,6 +25,7 @@ export function EditTeamForm({
 }) {
   const [state, action] = useActionState(editTeamRoster, {});
   const [dissolveState, dissolveAction] = useActionState(dissolveTeam, {});
+  const [nameValue, setNameValue] = useState(name);
   const [selected, setSelected] = useState<string[]>(memberIds);
   const [leader, setLeader] = useState(leaderId);
 
@@ -49,7 +50,7 @@ export function EditTeamForm({
         <input type="hidden" name="leaderId" value={leader} />
         <div className="space-y-1.5">
           <Label htmlFor="name">Team name</Label>
-          <Input id="name" name="name" defaultValue={name} required />
+          <Input id="name" name="name" value={nameValue} onChange={(e) => setNameValue(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
           <Label>Members</Label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { updateProfile } from "@/lib/actions/profile";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { SubmitButton } from "@/components/submit-button";
 
 export function ProfileEditForm({ batch, photoUrl }: { batch: string; photoUrl: string }) {
   const [state, action] = useActionState(updateProfile, {});
+  const [batchValue, setBatchValue] = useState(batch);
+  const [photoUrlValue, setPhotoUrlValue] = useState(photoUrl);
 
   useEffect(() => {
     if (state.success) toast.success("Profile updated.");
@@ -19,11 +21,23 @@ export function ProfileEditForm({ batch, photoUrl }: { batch: string; photoUrl: 
     <form action={action} className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="batch">Batch / Year</Label>
-        <Input id="batch" name="batch" defaultValue={batch} placeholder="e.g. 2nd Year, 2027" />
+        <Input
+          id="batch"
+          name="batch"
+          value={batchValue}
+          onChange={(e) => setBatchValue(e.target.value)}
+          placeholder="e.g. 2nd Year, 2027"
+        />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="photoUrl">Photo URL</Label>
-        <Input id="photoUrl" name="photoUrl" defaultValue={photoUrl} placeholder="https://..." />
+        <Input
+          id="photoUrl"
+          name="photoUrl"
+          value={photoUrlValue}
+          onChange={(e) => setPhotoUrlValue(e.target.value)}
+          placeholder="https://..."
+        />
       </div>
       <SubmitButton>Save changes</SubmitButton>
     </form>

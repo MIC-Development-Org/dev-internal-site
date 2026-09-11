@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/submit-button";
 
 export function CreateTeamForm({ candidates }: { candidates: { _id: string; name: string; email: string }[] }) {
   const [state, action] = useActionState(manualCreateTeam, {});
+  const [name, setName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [leaderId, setLeaderId] = useState<string>("");
 
@@ -19,6 +20,7 @@ export function CreateTeamForm({ candidates }: { candidates: { _id: string; name
       // Reset local selection to match the now-cleared candidate pool
       // once the server action confirms the team was created.
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setName("");
       setSelected([]);
       setLeaderId("");
     }
@@ -34,7 +36,7 @@ export function CreateTeamForm({ candidates }: { candidates: { _id: string; name
       <input type="hidden" name="leaderId" value={leaderId} />
       <div className="space-y-1.5">
         <Label htmlFor="name">Team name</Label>
-        <Input id="name" name="name" required />
+        <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
       <div className="space-y-1.5">
         <Label>Members (unassigned members shown)</Label>
