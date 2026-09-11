@@ -24,6 +24,7 @@ const COLLAPSE_STORAGE_KEY = "pitlane-sidebar-collapsed";
 export function AppShell({
   navItems,
   brand,
+  brandSubtitle,
   userName,
   userPhoto,
   signOutAction,
@@ -31,6 +32,7 @@ export function AppShell({
 }: {
   navItems: NavItem[];
   brand: string;
+  brandSubtitle?: string;
   userName: string;
   userPhoto?: string;
   signOutAction: () => Promise<void>;
@@ -66,7 +68,14 @@ export function AppShell({
   return (
     <div className="min-h-svh bg-background md:flex">
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-black px-4 text-white md:hidden">
-        <span className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-primary">{brand}</span>
+        <div className="flex items-baseline gap-2">
+          <span className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-primary">{brand}</span>
+          {brandSubtitle && (
+            <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
+              {brandSubtitle}
+            </span>
+          )}
+        </div>
         <button
           type="button"
           aria-label="Open menu"
@@ -118,6 +127,12 @@ export function AppShell({
             <X className="size-5" />
           </button>
         </div>
+
+        {brandSubtitle && !collapsed && (
+          <p className="px-4 pb-2 text-[10px] font-medium uppercase tracking-widest text-neutral-500">
+            {brandSubtitle}
+          </p>
+        )}
 
         <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-3 py-2">
           {navItems.map((item) => {

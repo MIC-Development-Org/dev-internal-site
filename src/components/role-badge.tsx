@@ -3,10 +3,10 @@ import type { UserRole } from "@/models/User";
 import { cn } from "cn";
 
 const LABELS: Record<UserRole, string> = {
-  admin: "RACE CONTROL",
-  lead: "TEAM PRINCIPAL",
-  senior: "DRIVER",
-  fresher: "JUNIOR DRIVER",
+  admin: "ADMIN",
+  lead: "TEAM LEAD",
+  senior: "SENIOR MEMBER",
+  fresher: "JUNIOR MEMBER",
 };
 
 export function RoleBadge({ role, className }: { role: UserRole; className?: string }) {

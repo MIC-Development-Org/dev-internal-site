@@ -36,7 +36,7 @@ export function ProjectStatusForm({ projectId, status }: { projectId: string; st
         >
           {PROJECT_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s.replace("_", " ")}
+              {s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
             </option>
           ))}
         </select>
