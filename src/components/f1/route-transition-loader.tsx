@@ -17,9 +17,11 @@ export function RouteTransitionLoader() {
     // event from the router), which is exactly what this effect syncs to.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRunning(true);
-    const t = setTimeout(() => setRunning(false), 500);
+    const t = setTimeout(() => setRunning(false), 550);
     return () => clearTimeout(t);
   }, [pathname]);
+
+  if (!running) return null;
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[90] h-1 overflow-hidden">
