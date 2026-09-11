@@ -1,9 +1,16 @@
 import { requireUser } from "@/lib/dal";
-import { getMyTeam } from "@/lib/data/teams";
+import {
+  getMyTeam,
+  TEAM_MAX_MEMBERS,
+  TEAM_MAX_SENIORS,
+  TEAM_MIN_MEMBERS,
+  TEAM_MIN_SENIORS,
+} from "@/lib/data/teams";
 import { getSettings } from "@/lib/data/settings";
 import { getProjectForTeam } from "@/lib/data/projects";
 import { isDeadlinePassed } from "@/lib/deadline";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ALLOWED_EMAIL_DOMAIN } from "@/auth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/role-badge";
 import { ProjectStatusBadge } from "@/components/project-status-badge";
@@ -36,12 +43,21 @@ export default async function TeamPage() {
             description="Team formation is closed. Ask an admin to assign you to a team."
           />
         ) : (
-          <Card>
+          <Card className="max-w-xl">
             <CardHeader>
               <CardTitle>Form your constructor</CardTitle>
+              <CardDescription>
+                Name your team and pull in your teammates by their VIT email.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <TeamFormationForm />
+              <TeamFormationForm
+                domain={ALLOWED_EMAIL_DOMAIN}
+                minMembers={TEAM_MIN_MEMBERS}
+                maxMembers={TEAM_MAX_MEMBERS}
+                minSeniors={TEAM_MIN_SENIORS}
+                maxSeniors={TEAM_MAX_SENIORS}
+              />
             </CardContent>
           </Card>
         )}
