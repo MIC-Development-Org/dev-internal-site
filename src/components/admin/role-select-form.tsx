@@ -5,6 +5,13 @@ import { toast } from "sonner";
 import { setUserRole } from "@/lib/actions/admin";
 import { USER_ROLES, type UserRole } from "@/lib/constants/roles";
 
+const ROLE_LABELS: Record<UserRole, string> = {
+  admin: "Admin",
+  lead: "Team Lead",
+  senior: "Senior Member",
+  fresher: "Junior Member",
+};
+
 export function RoleSelectForm({ userId, role }: { userId: string; role: UserRole }) {
   const [state, action] = useActionState(setUserRole, {});
 
@@ -24,7 +31,7 @@ export function RoleSelectForm({ userId, role }: { userId: string; role: UserRol
       >
         {USER_ROLES.map((r) => (
           <option key={r} value={r}>
-            {r}
+            {ROLE_LABELS[r]}
           </option>
         ))}
       </select>
