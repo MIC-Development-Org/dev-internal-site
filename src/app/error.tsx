@@ -18,16 +18,17 @@ export default function RootError({ error, reset }: { error: Error & { digest?: 
         <circle cx="80" cy="42" r="7" fill="currentColor" opacity="0.7" />
         <path d="M5 5 L35 55 M85 5 L60 55" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
       </svg>
-      <h1 className="text-3xl font-bold">Retirement.</h1>
+      <h1 className="text-3xl font-bold">Something went wrong.</h1>
       <p className="max-w-sm text-sm text-neutral-400">
-        Something failed on this lap. Box, box — try again, or head back to the pit lane.
+        We hit an unexpected error. Try again, or head back to the dashboard.
       </p>
+      <p className="text-xs uppercase tracking-widest text-destructive/70">Retirement — box, box.</p>
       <div className="flex gap-3">
         <Button onClick={reset} variant="outline">
-          Restart engine
+          Try Again
         </Button>
         <Button render={<Link href="/" />} nativeButton={false}>
-          Back to the pit lane
+          Back to Pit Lane
         </Button>
       </div>
     </div>
