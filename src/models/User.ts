@@ -12,6 +12,11 @@ const userSchema = new Schema(
     teamId: { type: Schema.Types.ObjectId, ref: "Team", default: null },
     points: { type: Number, default: 0 },
     batch: { type: String, default: "" },
+    hobbies: { type: String, default: "" },
+    techStack: { type: [String], default: [] },
+    portfolioUrl: { type: String, default: "" },
+    linkedinUrl: { type: String, default: "" },
+    githubUrl: { type: String, default: "" },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

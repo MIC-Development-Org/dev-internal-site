@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/dal";
 import { getMemberProfile } from "@/lib/data/users";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/role-badge";
 import { PodiumBadge } from "@/components/f1/podium-badge";
 import { ProfileEditForm } from "@/components/dashboard/profile-edit-form";
@@ -45,12 +46,73 @@ export default async function ProfilePage() {
         </CardContent>
       </Card>
 
+      {(profile.hobbies || profile.techStack?.length || profile.portfolioUrl || profile.linkedinUrl || profile.githubUrl) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>About</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profile.hobbies && <p className="text-sm text-muted-foreground">{profile.hobbies}</p>}
+            {profile.techStack && profile.techStack.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {profile.techStack.map((t) => (
+                  <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-xs">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+            {(profile.portfolioUrl || profile.linkedinUrl || profile.githubUrl) && (
+              <div className="flex flex-wrap gap-2">
+                {profile.portfolioUrl && (
+                  <Button
+                    render={<a href={profile.portfolioUrl} target="_blank" rel="noreferrer" />}
+                    nativeButton={false}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Portfolio
+                  </Button>
+                )}
+                {profile.linkedinUrl && (
+                  <Button
+                    render={<a href={profile.linkedinUrl} target="_blank" rel="noreferrer" />}
+                    nativeButton={false}
+                    variant="outline"
+                    size="sm"
+                  >
+                    LinkedIn
+                  </Button>
+                )}
+                {profile.githubUrl && (
+                  <Button
+                    render={<a href={profile.githubUrl} target="_blank" rel="noreferrer" />}
+                    nativeButton={false}
+                    variant="outline"
+                    size="sm"
+                  >
+                    GitHub
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Edit profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProfileEditForm batch={profile.batch ?? ""} photoUrl={profile.photoUrl ?? ""} />
+          <ProfileEditForm
+            batch={profile.batch ?? ""}
+            hobbies={profile.hobbies ?? ""}
+            techStack={profile.techStack ?? []}
+            portfolioUrl={profile.portfolioUrl ?? ""}
+            linkedinUrl={profile.linkedinUrl ?? ""}
+            githubUrl={profile.githubUrl ?? ""}
+          />
         </CardContent>
       </Card>
     </div>

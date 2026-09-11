@@ -11,9 +11,23 @@ export async function updateProfile(_prevState: ActionState, formData: FormData)
   await connectToDatabase();
 
   const batch = String(formData.get("batch") ?? "").trim();
-  const photoUrl = String(formData.get("photoUrl") ?? "").trim();
+  const hobbies = String(formData.get("hobbies") ?? "").trim();
+  const techStack = String(formData.get("techStack") ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const portfolioUrl = String(formData.get("portfolioUrl") ?? "").trim();
+  const linkedinUrl = String(formData.get("linkedinUrl") ?? "").trim();
+  const githubUrl = String(formData.get("githubUrl") ?? "").trim();
 
-  await UserModel.findByIdAndUpdate(user._id, { batch, photoUrl });
+  await UserModel.findByIdAndUpdate(user._id, {
+    batch,
+    hobbies,
+    techStack,
+    portfolioUrl,
+    linkedinUrl,
+    githubUrl,
+  });
 
   revalidatePath("/dashboard/profile");
   return { success: true };
