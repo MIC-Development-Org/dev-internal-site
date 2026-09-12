@@ -6,6 +6,9 @@ export const AUDIT_ACTIONS = [
   "team_roster_updated",
   "team_dissolved",
   "project_status_changed",
+  "project_created",
+  "project_updated",
+  "project_deleted",
   "settings_updated",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

@@ -14,7 +14,7 @@ const feedbackSchema = new Schema(
 
 const projectSchema = new Schema(
   {
-    teamId: { type: Schema.Types.ObjectId, ref: "Team", required: true },
+    teamId: { type: Schema.Types.ObjectId, ref: "Team", default: null },
     title: { type: String, required: true },
     description: { type: String, required: true },
     techStack: { type: [String], default: [] },

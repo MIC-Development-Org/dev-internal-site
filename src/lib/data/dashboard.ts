@@ -106,7 +106,7 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
   }));
 
   // Hydrate recent projects — look up team names
-  const teamIds = recentProjectsRaw.map((p) => p.teamId);
+  const teamIds = recentProjectsRaw.map((p) => p.teamId).filter(Boolean).map(String);
   const teamDocs = await TeamModel.find({ _id: { $in: teamIds } })
     .select("_id name")
     .lean();
