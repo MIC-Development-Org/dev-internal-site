@@ -78,10 +78,10 @@ export async function createTeam(_prevState: ActionState, formData: FormData): P
 
   const existingByEmail = new Map(existingTeammates.map((u) => [u.email, u]));
   const seniorCount =
-    (user.role === "senior" || user.role === "admin" ? 1 : 0) +
+    (user.role === "senior" ? 1 : 0) +
     teammateEmails.filter((e) => {
       const existing = existingByEmail.get(e);
-      return existing?.role === "senior" || existing?.role === "admin";
+      return existing?.role === "senior";
     }).length;
 
   if (seniorCount < TEAM_MIN_SENIORS || seniorCount > TEAM_MAX_SENIORS) {

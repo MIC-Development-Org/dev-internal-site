@@ -66,7 +66,7 @@ function MemberCard({ member }: { member: Member }) {
   const visibleTech = techStack.slice(0, 3);
   const extraTech = techStack.length - visibleTech.length;
 
-  const bgImage = member.role === "lead" || member.role === "admin"
+  const bgImage = member.role === "lead"
     ? "/img1.png"
     : member.role === "senior"
       ? "/img2.png"
@@ -166,12 +166,12 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
         m.name.toLowerCase().includes(q) ||
         (m.email?.toLowerCase().includes(q) ?? false) ||
         (m.techStack?.some((t) => t.toLowerCase().includes(q)) ?? false);
-      const matchesRole = activeTab === "all" || m.role === activeTab || (activeTab === "lead" && m.role === "admin");
+      const matchesRole = activeTab === "all" || m.role === activeTab;
       return matchesSearch && matchesRole;
     });
   }, [initialMembers, search, activeTab]);
 
-  const leads = filteredMembers.filter(m => m.role === "lead" || m.role === "admin");
+  const leads = filteredMembers.filter(m => m.role === "lead");
   const seniors = filteredMembers.filter(m => m.role === "senior");
   const freshers = filteredMembers.filter(m => m.role === "fresher");
 
