@@ -7,6 +7,8 @@ declare module "next-auth" {
       id: string;
       role: UserRole;
       teamId: string | null;
+      /** True if the signed-in email exists in the AdminRecord collection. */
+      isAdmin: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -16,5 +18,7 @@ declare module "next-auth/jwt" {
     userId?: string;
     role?: UserRole;
     teamId?: string | null;
+    /** Stamped at sign-in from the AdminRecord collection. */
+    isAdmin?: boolean;
   }
 }
