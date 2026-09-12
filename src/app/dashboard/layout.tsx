@@ -1,26 +1,15 @@
-import { LayoutDashboard, Users, FolderKanban, LayoutGrid, Trophy, BookUser } from "lucide-react";
 import { requireUser } from "@/lib/dal";
 import { signOut } from "@/auth";
-import { AppShell, type NavItem } from "@/components/app-shell";
-
-const ICON_CLASS = "size-5 shrink-0";
-
-const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className={ICON_CLASS} />, exact: true },
-  { href: "/dashboard/team", label: "My Team", icon: <Users className={ICON_CLASS} /> },
-  { href: "/dashboard/project", label: "My Project", icon: <FolderKanban className={ICON_CLASS} /> },
-  { href: "/dashboard/showcase", label: "Projects", icon: <LayoutGrid className={ICON_CLASS} /> },
-  { href: "/dashboard/leaderboard", label: "Leaderboard", icon: <Trophy className={ICON_CLASS} /> },
-  { href: "/dashboard/directory", label: "Members", icon: <BookUser className={ICON_CLASS} /> },
-];
+import { DashboardChrome } from "@/components/dashboard-chrome";
+import { DASHBOARD_NAV_ITEMS } from "@/lib/nav-items";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   const user = await requireUser();
 
   return (
-    <AppShell
-      brand="Pit Lane"
-      navItems={NAV_ITEMS}
+    <DashboardChrome
+      brand="MIC"
+      navItems={DASHBOARD_NAV_ITEMS}
       userName={user.name}
       userPhoto={user.photoUrl}
       signOutAction={async () => {
@@ -29,6 +18,6 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
       }}
     >
       {children}
-    </AppShell>
+    </DashboardChrome>
   );
 }
