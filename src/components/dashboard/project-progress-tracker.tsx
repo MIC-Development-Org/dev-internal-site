@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ProjectStatus } from "@/models/Project";
+import type { ProjectStatus } from "@/lib/constants/project-status";
 
 const STEPS: { key: ProjectStatus; label: string }[] = [
   { key: "submitted", label: "Submitted" },
