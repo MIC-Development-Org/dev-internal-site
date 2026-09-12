@@ -7,7 +7,7 @@ import { HeroBackgroundVideo } from "@/components/f1/hero-background-video";
 export default async function Home() {
   const session = await auth();
   if (session?.user) {
-    redirect(session.user.role === "admin" ? "/admin" : "/dashboard");
+    redirect("/dashboard");
   }
 
   return (

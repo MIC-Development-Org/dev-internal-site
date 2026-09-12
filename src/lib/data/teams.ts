@@ -69,7 +69,7 @@ export async function getUnassignedMembers(): Promise<TeamMember[]> {
 }
 
 export function countSeniors(members: { role: string }[]) {
-  return members.filter((m) => m.role === "senior" || m.role === "admin").length;
+  return members.filter((m) => m.role === "senior").length;
 }
 
 export async function deleteTeamCascade(teamId: string) {
