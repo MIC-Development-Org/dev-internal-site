@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import type { ProjectStatus } from "@/models/Project";
+import type { ProjectStatus } from "@/lib/constants/project-status";
 
 const LABELS: Record<ProjectStatus, string> = {
   submitted: "Submitted",

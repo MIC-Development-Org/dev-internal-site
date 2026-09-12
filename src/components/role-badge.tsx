@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import type { UserRole } from "@/models/User";
+import type { UserRole } from "@/lib/constants/roles";
 import { cn } from "cn";
 
 const LABELS: Record<UserRole, string> = {
