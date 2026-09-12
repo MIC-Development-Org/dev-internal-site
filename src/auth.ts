@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { connectToDatabase } from "@/lib/mongodb";
 import { UserModel, type UserRole } from "@/models/User";
+import { AdminModel } from "@/models/Admin";
 
 export const ALLOWED_EMAIL_DOMAIN = "vitstudent.ac.in";
 
@@ -40,12 +41,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!token.email) return token;
 
       await connectToDatabase();
+
+      // Fetch member data
       const dbUser = await UserModel.findOne({ email: token.email });
       if (dbUser) {
         token.userId = dbUser._id.toString();
-        token.role = dbUser.role;
+        token.role = dbUser.role as UserRole;
         token.teamId = dbUser.teamId ? dbUser.teamId.toString() : null;
       }
+
+      // Check admin status from the dedicated AdminRecord collection.
+      // An email in this collection has admin access regardless of their
+      // User.role value. The two are completely independent.
+      const adminExists = await AdminModel.exists({ email: token.email });
+      token.isAdmin = adminExists !== null;
+
       return token;
     },
     async session({ session, token }) {
@@ -53,6 +63,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.userId as string;
         session.user.role = (token.role as UserRole) ?? "fresher";
         session.user.teamId = (token.teamId as string | null) ?? null;
+        session.user.isAdmin = Boolean(token.isAdmin);
       }
       return session;
     },

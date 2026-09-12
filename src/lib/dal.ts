@@ -20,8 +20,23 @@ export async function requireUser(): Promise<User> {
   return user;
 }
 
+/**
+ * Guards admin-only routes.
+ *
+ * Admin access is determined by the AdminRecord collection, NOT by the
+ * user's organizational role. The JWT callback stamps `isAdmin` on the
+ * session token at sign-in time, so no extra DB query is needed here.
+ */
 export async function requireAdmin(): Promise<User> {
-  const user = await requireUser();
-  if (user.role !== "admin") redirect("/dashboard");
+  const session = await auth();
+
+  // Not authenticated at all → send to sign-in
+  if (!session?.user?.id) redirect("/login");
+
+  // Authenticated but not in the AdminRecord table → member dashboard
+  if (!session.user.isAdmin) redirect("/dashboard");
+
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
   return user;
 }
