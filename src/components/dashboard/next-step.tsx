@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ProjectStatus } from "@/models/Project";
+import type { ProjectStatus } from "@/lib/constants/project-status";
 
 export type NextStepTeam = { isLeader: boolean } | null;
 export type NextStepProject = { status: ProjectStatus } | null;
