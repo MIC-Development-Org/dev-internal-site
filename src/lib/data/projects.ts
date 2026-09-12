@@ -23,15 +23,15 @@ export async function getShowcaseProjects(filter?: { status?: ProjectStatus; tec
     query.techStack = filter.tech;
   }
   const projects = await ProjectModel.find(query).sort({ updatedAt: -1 }).lean();
-  const teamIds = projects.map((p) => p.teamId);
+  const teamIds = projects.map((p) => p.teamId).filter(Boolean).map(String);
   const teams = await TeamModel.find({ _id: { $in: teamIds } }).select("_id name").lean();
   const teamNameById = new Map(teams.map((t) => [String(t._id), t.name]));
 
   return projects.map((p) => ({
     ...p,
     _id: String(p._id),
-    teamId: String(p.teamId),
-    teamName: teamNameById.get(String(p.teamId)) ?? "Unknown team",
+    teamId: p.teamId ? String(p.teamId) : null,
+    teamName: p.teamId ? (teamNameById.get(String(p.teamId)) ?? "Unknown team") : "Unassigned",
   }));
 }
 
@@ -41,14 +41,25 @@ export async function getAllProjectsForAdmin(filter?: { status?: ProjectStatus }
   if (filter?.status) query.status = filter.status;
 
   const projects = await ProjectModel.find(query).sort({ createdAt: -1 }).lean();
-  const teamIds = projects.map((p) => p.teamId);
+  const teamIds = projects.map((p) => p.teamId).filter(Boolean).map(String);
   const teams = await TeamModel.find({ _id: { $in: teamIds } }).select("_id name").lean();
   const teamNameById = new Map(teams.map((t) => [String(t._id), t.name]));
 
   return projects.map((p) => ({
     ...p,
     _id: String(p._id),
-    teamId: String(p.teamId),
-    teamName: teamNameById.get(String(p.teamId)) ?? "Unknown team",
+    teamId: p.teamId ? String(p.teamId) : null,
+    teamName: p.teamId ? (teamNameById.get(String(p.teamId)) ?? "Unknown team") : "Unassigned",
+  }));
+}
+
+export async function getAvailableProjects() {
+  await connectToDatabase();
+  const projects = await ProjectModel.find({ teamId: null }).sort({ createdAt: -1 }).lean();
+  return projects.map((p) => ({
+    ...p,
+    _id: String(p._id),
+    teamId: null,
+    teamName: "Unassigned",
   }));
 }
