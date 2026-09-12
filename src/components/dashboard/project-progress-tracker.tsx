@@ -47,7 +47,10 @@ export function ProjectProgressTracker({ status }: { status: ProjectStatus }) {
             </div>
             {i < STEPS.length - 1 && (
               <div
-                className={cn("mx-1 mt-3.5 h-0.5 flex-1 rounded-full", i < currentIndex ? "bg-primary" : "bg-border")}
+                className={cn(
+                  "mx-1 mt-3.5 h-0.5 flex-1 rounded-full bg-[repeating-linear-gradient(90deg,currentColor_0_6px,transparent_6px_10px)]",
+                  i < currentIndex ? "text-primary" : "text-border"
+                )}
               />
             )}
           </div>

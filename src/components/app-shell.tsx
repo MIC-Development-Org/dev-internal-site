@@ -19,6 +19,16 @@ import {
 // values and already-rendered elements/children can).
 export type NavItem = { href: string; label: string; icon: ReactNode; exact?: boolean };
 
+export type AppShellProps = {
+  navItems: NavItem[];
+  brand: string;
+  brandSubtitle?: string;
+  userName: string;
+  userPhoto?: string;
+  signOutAction: () => Promise<void>;
+  children: React.ReactNode;
+};
+
 const COLLAPSE_STORAGE_KEY = "pitlane-sidebar-collapsed";
 
 export function AppShell({
@@ -29,15 +39,7 @@ export function AppShell({
   userPhoto,
   signOutAction,
   children,
-}: {
-  navItems: NavItem[];
-  brand: string;
-  brandSubtitle?: string;
-  userName: string;
-  userPhoto?: string;
-  signOutAction: () => Promise<void>;
-  children: React.ReactNode;
-}) {
+}: AppShellProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   // Starts expanded so SSR/first client render match; the stored desktop

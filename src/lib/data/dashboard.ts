@@ -5,6 +5,25 @@ import { TeamModel } from "@/models/Team";
 import { ProjectModel } from "@/models/Project";
 import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/constants/project-status";
 
+export type DepartmentSnapshot = {
+  members: number;
+  teams: number;
+  projects: number;
+  completed: number;
+};
+
+/** Lightweight, non-admin-scoped counts for the member dashboard's snapshot strip. */
+export async function getDepartmentSnapshot(): Promise<DepartmentSnapshot> {
+  await connectToDatabase();
+  const [members, teams, projects, completed] = await Promise.all([
+    UserModel.countDocuments(),
+    TeamModel.countDocuments(),
+    ProjectModel.countDocuments(),
+    ProjectModel.countDocuments({ status: "completed" }),
+  ]);
+  return { members, teams, projects, completed };
+}
+
 export type AdminDashboardStats = {
   totalMembers: number;
   totalSeniors: number;
