@@ -11,9 +11,8 @@ import { NextStep, type NextStepProject, type NextStepTeam } from "@/components/
 import { DepartmentSnapshot } from "@/components/dashboard/department-snapshot";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { PitGarage } from "@/components/dashboard/pit-garage";
-import { getProjectProgressPercent } from "@/lib/constants/project-status";
-import type { UserRole } from "@/models/User";
-import type { ProjectStatus } from "@/models/Project";
+import { getProjectProgressPercent, type ProjectStatus } from "@/lib/constants/project-status";
+import type { UserRole } from "@/lib/constants/roles";
 import type { DepartmentSnapshot as DepartmentSnapshotData } from "@/lib/data/dashboard";
 import type { ActivityEntry } from "@/lib/data/activity";
 

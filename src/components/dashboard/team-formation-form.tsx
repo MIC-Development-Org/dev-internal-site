@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/role-badge";
 import { SubmitButton } from "@/components/submit-button";
-import type { UserRole } from "@/models/User";
+import type { UserRole } from "@/lib/constants/roles";
 
 type TeamFormationFormProps = {
   domain: string;
