@@ -9,7 +9,10 @@ const ACTION_LABELS: Record<AuditAction, string> = {
   team_created: "Team created",
   team_roster_updated: "Roster",
   team_dissolved: "Team dissolved",
-  project_status_changed: "Project",
+  project_status_changed: "Project status",
+  project_created: "Project created",
+  project_updated: "Project updated",
+  project_deleted: "Project deleted",
   settings_updated: "Settings",
 };
 
