@@ -225,3 +225,138 @@ export async function updateSettings(_prevState: ActionState, formData: FormData
   revalidatePath("/dashboard/team");
   return { success: true };
 }
+
+export async function adminCreateProject(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const admin = await requireAdmin();
+  await connectToDatabase();
+
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const teamId = String(formData.get("teamId") ?? "").trim() || null;
+
+  if (!title || !description) return { error: "Title and description are required." };
+
+  let assignedTeam = null;
+  if (teamId) {
+    assignedTeam = await TeamModel.findById(teamId);
+    if (!assignedTeam) return { error: "Assigned team not found." };
+  }
+
+  const project = await ProjectModel.create({
+    title,
+    description,
+    techStack: [],
+    repoUrl: "",
+    liveUrl: "",
+    status: "submitted",
+    teamId: assignedTeam ? assignedTeam._id : null,
+  });
+
+  if (assignedTeam) {
+    assignedTeam.projectId = project._id;
+    await assignedTeam.save();
+  }
+
+  await logAdminAction(
+    admin,
+    "project_created",
+    `Created project "${title}"${assignedTeam ? ` and assigned to team "${assignedTeam.name}"` : " (Unassigned)"}`
+  );
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/dashboard/project");
+  revalidatePath("/dashboard/showcase");
+  return { success: true };
+}
+
+export async function adminEditProject(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const admin = await requireAdmin();
+  await connectToDatabase();
+
+  const projectId = String(formData.get("projectId") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const techStackRaw = String(formData.get("techStack") ?? "");
+  const techStack = techStackRaw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const repoUrl = String(formData.get("repoUrl") ?? "").trim();
+  const liveUrl = String(formData.get("liveUrl") ?? "").trim();
+  const status = String(formData.get("status") ?? "submitted") as ProjectStatus;
+  const newTeamId = String(formData.get("teamId") ?? "").trim() || null;
+
+  if (!projectId) return { error: "Project ID is required." };
+  if (!title || !description) return { error: "Title and description are required." };
+  if (!PROJECT_STATUSES.includes(status)) return { error: "Invalid project status." };
+
+  const project = await ProjectModel.findById(projectId);
+  if (!project) return { error: "Project not found." };
+
+  const oldTeamId = project.teamId ? String(project.teamId) : null;
+
+  // If team assignment changed:
+  if (oldTeamId !== newTeamId) {
+    // Unlink old team if present
+    if (oldTeamId) {
+      await TeamModel.findByIdAndUpdate(oldTeamId, { $set: { projectId: null } });
+    }
+    // Link new team if present
+    if (newTeamId) {
+      const newTeam = await TeamModel.findById(newTeamId);
+      if (!newTeam) return { error: "New assigned team not found." };
+      newTeam.projectId = project._id;
+      await newTeam.save();
+      project.teamId = newTeam._id;
+    } else {
+      project.teamId = null;
+    }
+  }
+
+  project.title = title;
+  project.description = description;
+  project.techStack = techStack;
+  project.repoUrl = repoUrl;
+  project.liveUrl = liveUrl;
+  project.status = status;
+
+  await project.save();
+
+  await logAdminAction(
+    admin,
+    "project_updated",
+    `Updated project "${title}" details and assignment`
+  );
+
+  revalidatePath("/admin/projects");
+  revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath("/dashboard/project");
+  revalidatePath("/dashboard/showcase");
+  return { success: true };
+}
+
+export async function adminDeleteProject(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const admin = await requireAdmin();
+  await connectToDatabase();
+
+  const projectId = String(formData.get("projectId") ?? "");
+  if (!projectId) return { error: "Project ID is required." };
+
+  const project = await ProjectModel.findById(projectId);
+  if (!project) return { error: "Project not found." };
+
+  const projectTitle = project.title;
+
+  // Unlink any team that holds this project
+  await TeamModel.updateMany({ projectId: project._id }, { $set: { projectId: null } });
+
+  // Delete project
+  await ProjectModel.findByIdAndDelete(projectId);
+
+  await logAdminAction(admin, "project_deleted", `Deleted project "${projectTitle}"`);
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/dashboard/project");
+  revalidatePath("/dashboard/showcase");
+  return { success: true };
+}
