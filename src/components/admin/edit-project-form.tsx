@@ -7,6 +7,7 @@ import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/constants/project-st
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FieldError } from "@/components/field-error";
 import { SubmitButton } from "@/components/submit-button";
 
 type TeamOption = {
@@ -41,7 +42,7 @@ export function EditProjectForm({ projectId, defaults, teams }: EditProjectFormP
   const [teamId, setTeamId] = useState<string>(defaults.teamId ?? "");
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
+    if (state.error && !state.fieldErrors) toast.error(state.error);
     if (state.success) toast.success("Project updated successfully.");
   }, [state]);
 
@@ -56,10 +57,13 @@ export function EditProjectForm({ projectId, defaults, teams }: EditProjectFormP
         <Input
           id="edit-project-title"
           name="title"
+          aria-invalid={Boolean(state.fieldErrors?.title)}
+          aria-describedby={state.fieldErrors?.title ? "edit-project-title-error" : undefined}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
+        <FieldError id="edit-project-title" message={state.fieldErrors?.title} />
       </div>
 
       <div className="space-y-1.5">
@@ -69,11 +73,14 @@ export function EditProjectForm({ projectId, defaults, teams }: EditProjectFormP
         <Textarea
           id="edit-project-desc"
           name="description"
+          aria-invalid={Boolean(state.fieldErrors?.description)}
+          aria-describedby={state.fieldErrors?.description ? "edit-project-desc-error" : undefined}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           required
         />
+        <FieldError id="edit-project-desc" message={state.fieldErrors?.description} />
       </div>
 
       <div className="space-y-1.5">
@@ -81,10 +88,13 @@ export function EditProjectForm({ projectId, defaults, teams }: EditProjectFormP
         <Input
           id="edit-project-tech"
           name="techStack"
+          aria-invalid={Boolean(state.fieldErrors?.techStack)}
+          aria-describedby={state.fieldErrors?.techStack ? "edit-project-tech-error" : undefined}
           value={techStack}
           onChange={(e) => setTechStack(e.target.value)}
           placeholder="Next.js, TypeScript, Tailwind"
         />
+        <FieldError id="edit-project-tech" message={state.fieldErrors?.techStack} />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -93,20 +103,26 @@ export function EditProjectForm({ projectId, defaults, teams }: EditProjectFormP
           <Input
             id="edit-project-repo"
             name="repoUrl"
+            aria-invalid={Boolean(state.fieldErrors?.repoUrl)}
+            aria-describedby={state.fieldErrors?.repoUrl ? "edit-project-repo-error" : undefined}
             value={repoUrl}
             onChange={(e) => setRepoUrl(e.target.value)}
             placeholder="https://github.com/..."
           />
+          <FieldError id="edit-project-repo" message={state.fieldErrors?.repoUrl} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="edit-project-live">Live Demo URL</Label>
           <Input
             id="edit-project-live"
             name="liveUrl"
+            aria-invalid={Boolean(state.fieldErrors?.liveUrl)}
+            aria-describedby={state.fieldErrors?.liveUrl ? "edit-project-live-error" : undefined}
             value={liveUrl}
             onChange={(e) => setLiveUrl(e.target.value)}
             placeholder="https://..."
           />
+          <FieldError id="edit-project-live" message={state.fieldErrors?.liveUrl} />
         </div>
       </div>
 

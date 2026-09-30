@@ -12,11 +12,12 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { Flag, X, AlertTriangle, CircleUserRound, CheckCircle2, Circle, UserPlus } from "lucide-react";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { createTeam, lookupTeammate, type TeammateLookup } from "@/lib/actions/team";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/role-badge";
+import { FieldError } from "@/components/field-error";
 import { SubmitButton } from "@/components/submit-button";
 import type { UserRole } from "@/lib/constants/roles";
 
@@ -59,7 +60,7 @@ export function TeamFormationForm({
   const requestId = useRef(0);
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
+    if (state.error && !state.fieldErrors) toast.error(state.error);
     if (state.success) {
       toast.success("Team created successfully.");
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -199,8 +200,11 @@ export function TeamFormationForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            aria-invalid={Boolean(state.fieldErrors?.name)}
+            aria-describedby={state.fieldErrors?.name ? "name-error" : undefined}
             className="h-12 font-condensed text-xl font-semibold uppercase tracking-wide placeholder:normal-case placeholder:font-sans placeholder:text-base placeholder:font-normal placeholder:tracking-normal"
           />
+          <FieldError id="name" message={state.fieldErrors?.name} />
         </section>
 
         <section className="surface space-y-3 p-5">
@@ -231,6 +235,8 @@ export function TeamFormationForm({
               Add
             </button>
           </div>
+
+          <FieldError id="emails" message={state.fieldErrors?.emails} />
 
           {emails.length === 0 && (
             <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">

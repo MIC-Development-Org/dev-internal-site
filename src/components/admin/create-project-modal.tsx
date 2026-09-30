@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FieldError } from "@/components/field-error";
 import { SubmitButton } from "@/components/submit-button";
 import {
   Dialog,
@@ -33,7 +34,7 @@ export function CreateProjectModal({ teams }: { teams: TeamOption[] }) {
   const [teamId, setTeamId] = useState("");
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
+    if (state.error && !state.fieldErrors) toast.error(state.error);
     if (state.success) {
       toast.success("Project created successfully.");
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -77,11 +78,14 @@ export function CreateProjectModal({ teams }: { teams: TeamOption[] }) {
             <Input
               id="create-project-title"
               name="title"
+              aria-invalid={Boolean(state.fieldErrors?.title)}
+              aria-describedby={state.fieldErrors?.title ? "create-project-title-error" : undefined}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Telemetry Dashboard"
               required
             />
+            <FieldError id="create-project-title" message={state.fieldErrors?.title} />
           </div>
 
           <div className="space-y-1.5">
@@ -91,12 +95,15 @@ export function CreateProjectModal({ teams }: { teams: TeamOption[] }) {
             <Textarea
               id="create-project-desc"
               name="description"
+              aria-invalid={Boolean(state.fieldErrors?.description)}
+              aria-describedby={state.fieldErrors?.description ? "create-project-desc-error" : undefined}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Detailed description of the project scope, requirements, and deliverables..."
               rows={4}
               required
             />
+            <FieldError id="create-project-desc" message={state.fieldErrors?.description} />
           </div>
 
           <div className="space-y-1.5">
