@@ -26,11 +26,11 @@ export function ProjectProgressTracker({ status }: { status: ProjectStatus }) {
             <div className="flex flex-col items-center gap-1.5">
               <div
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold",
+                  "flex size-8 shrink-0 items-center justify-center rounded-full border-2 font-mono text-xs font-bold",
                   blocked
                     ? "border-destructive bg-destructive/10 text-destructive"
                     : done || (current && !blocked)
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "border-primary bg-primary text-primary-foreground shadow-[0_0_12px_var(--primary)]"
                       : "border-border text-muted-foreground"
                 )}
               >
@@ -48,7 +48,7 @@ export function ProjectProgressTracker({ status }: { status: ProjectStatus }) {
             {i < STEPS.length - 1 && (
               <div
                 className={cn(
-                  "mx-1 mt-3.5 h-0.5 flex-1 rounded-full bg-[repeating-linear-gradient(90deg,currentColor_0_6px,transparent_6px_10px)]",
+                  "mx-1 mt-4 h-0.5 flex-1 rounded-full bg-[repeating-linear-gradient(90deg,currentColor_0_6px,transparent_6px_10px)]",
                   i < currentIndex ? "text-primary" : "text-border"
                 )}
               />

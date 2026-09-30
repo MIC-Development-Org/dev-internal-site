@@ -12,11 +12,11 @@ const FIELDS: { key: keyof DepartmentSnapshotData; label: string }[] = [
 export function DepartmentSnapshot({ snapshot }: { snapshot: DepartmentSnapshotData }) {
   return (
     <div>
-      <h2 className="mb-3 text-label-caps text-muted-foreground">Department</h2>
-      <div className="grid grid-cols-2 divide-x divide-y divide-border rounded-xl border border-border sm:grid-cols-4 sm:divide-y-0">
+      <h2 className="section-title mb-3">Department</h2>
+      <div className="grid grid-cols-2 surface divide-x divide-y divide-border sm:grid-cols-4 sm:divide-y-0">
         {FIELDS.map(({ key, label }) => (
-          <div key={key} className="px-4 py-3 text-center">
-            <p className="text-telemetry-md tabular-nums text-foreground">{snapshot[key]}</p>
+          <div key={key} className="px-4 py-5 text-center">
+            <p className="text-telemetry-lg tabular-nums text-foreground">{snapshot[key]}</p>
             <p className="text-label-caps text-muted-foreground">{label}</p>
           </div>
         ))}

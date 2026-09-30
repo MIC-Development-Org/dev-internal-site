@@ -13,7 +13,7 @@ export default async function MemberProfilePage({ params }: PageProps<"/dashboar
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Member Profile</h1>
+      <h1 className="page-title">Member Profile</h1>
       <Card>
         <CardContent className="flex flex-wrap items-center gap-6 pt-6">
           <Avatar className="h-20 w-20">

@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Overview</h1>
+        <h1 className="page-title">Overview</h1>
         <p className="text-sm text-muted-foreground">
           Live snapshot of the department — all numbers pulled directly from the
           database.

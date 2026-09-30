@@ -18,7 +18,7 @@ export default async function ShowcaseDetailPage({ params }: PageProps<"/dashboa
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">{project.title}</h1>
+          <h1 className="page-title">{project.title}</h1>
           <p className="text-sm text-muted-foreground">{team?.name ?? "Unknown team"}</p>
         </div>
         <ProjectStatusBadge status={project.status} />

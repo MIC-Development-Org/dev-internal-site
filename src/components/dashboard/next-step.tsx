@@ -39,7 +39,7 @@ export function NextStep({ team, project }: { team: NextStepTeam; project: NextS
   const step = getNextStep(team, project);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border-l-4 border-primary bg-primary/5 px-5 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 relative overflow-hidden rounded-xl border border-primary/30 border-l-4 border-l-primary bg-gradient-to-r from-primary/15 via-primary/5 to-transparent px-5 py-4 shadow-[0_0_30px_-12px_var(--primary)]">
       <div>
         <p className="text-label-caps text-primary">Next Step</p>
         <p className="mt-1 text-sm text-foreground">{step.message}</p>

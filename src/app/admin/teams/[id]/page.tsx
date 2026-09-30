@@ -20,7 +20,7 @@ export default async function AdminTeamDetailPage({ params }: PageProps<"/admin/
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{team.name}</h1>
+        <h1 className="page-title">{team.name}</h1>
         {project && <ProjectStatusBadge status={project.status} />}
       </div>
 

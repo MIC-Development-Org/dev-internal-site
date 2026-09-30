@@ -7,7 +7,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="page-title">Settings</h1>
       <Card className="max-w-md">
         <CardHeader>
           <CardTitle>Team formation</CardTitle>

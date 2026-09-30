@@ -85,22 +85,22 @@ export function DashboardOverview({
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-10">
       {/* YOUR OVERVIEW */}
       <motion.section variants={item}>
-        <h2 className="mb-3 text-label-caps text-muted-foreground">Your Overview</h2>
-        <div className="rounded-xl border border-border bg-card p-6">
+        <h2 className="section-title mb-3">Your Overview</h2>
+        <div className="surface bg-grid overflow-hidden p-6">
           <div className="flex flex-wrap items-center gap-4">
             <Avatar className="h-16 w-16 ring-2 ring-primary/30">
               <AvatarImage src={profile.photoUrl ?? undefined} alt={profile.name} />
               <AvatarFallback className="text-lg">{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold">{profile.name}</h3>
+              <h3 className="font-condensed text-2xl font-bold uppercase tracking-wide">{profile.name}</h3>
               <RoleBadge role={profile.role} />
             </div>
             <div className="ml-auto flex items-center gap-3">
               <PodiumBadge rank={profile.rank} />
               <div className="text-right">
-                <p className="text-2xl font-bold tabular-nums">{points}</p>
-                <p className="text-xs text-muted-foreground">points</p>
+                <p className="text-telemetry-lg text-glow tabular-nums text-primary">{points}</p>
+                <p className="text-label-caps text-muted-foreground">points</p>
               </div>
             </div>
           </div>
@@ -116,7 +116,13 @@ export function DashboardOverview({
             </div>
             <div>
               <p className="text-label-caps text-muted-foreground">Progress</p>
-              <p className="mt-1 text-sm font-medium tabular-nums">{progressPercent}%</p>
+              <p className="mt-1 text-telemetry-md tabular-nums">{progressPercent}%</p>
+              <div className="mx-auto mt-2 h-1 w-20 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary shadow-[0_0_8px_var(--primary)] transition-all duration-700"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -129,16 +135,16 @@ export function DashboardOverview({
 
       {/* PROJECT PROGRESS */}
       <motion.section variants={item}>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-label-caps text-muted-foreground">Project Progress</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="section-title flex-1">Project Progress</h2>
           {project && <ProjectStatusBadge status={project.status} />}
         </div>
         {project ? (
-          <div className="overflow-x-auto rounded-xl border border-border bg-card p-6">
+          <div className="surface overflow-x-auto p-6">
             <ProjectProgressTracker status={project.status} />
           </div>
         ) : (
-          <p className="rounded-xl border border-dashed border-border bg-card/50 px-6 py-8 text-center text-sm text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-border bg-card/40 px-6 py-8 text-center text-sm text-muted-foreground">
             Project progress will appear here once your team submits a project.
           </p>
         )}

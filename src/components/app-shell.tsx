@@ -71,7 +71,7 @@ export function AppShell({
     <div className="min-h-svh bg-background md:flex">
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-black px-4 text-white md:hidden">
         <div className="flex items-baseline gap-2">
-          <span className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-primary">{brand}</span>
+          <span className="font-condensed text-lg font-extrabold uppercase tracking-[0.18em] text-primary text-glow">{brand}</span>
           {brandSubtitle && (
             <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
               {brandSubtitle}
@@ -98,7 +98,7 @@ export function AppShell({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 -translate-x-full flex-col border-r border-border bg-black text-white transition-[transform,width] duration-200 md:sticky md:top-0 md:h-svh md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 -translate-x-full flex-col border-r border-border bg-gradient-to-b from-neutral-950 to-black text-white transition-[transform,width] duration-200 md:sticky md:top-0 md:h-svh md:translate-x-0",
           open && "translate-x-0",
           collapsed ? "md:w-16" : "md:w-64"
         )}
@@ -106,7 +106,7 @@ export function AppShell({
         <div className="flex h-14 items-center justify-between px-4">
           <span
             className={cn(
-              "font-mono text-sm font-bold uppercase tracking-[0.2em] text-primary",
+              "font-condensed text-xl font-extrabold uppercase tracking-[0.18em] text-primary text-glow",
               collapsed && "md:hidden"
             )}
           >
@@ -148,11 +148,11 @@ export function AppShell({
                 onClick={() => setOpen(false)}
                 title={item.label}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all",
                   collapsed && "md:justify-center md:px-0",
                   active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-neutral-300 hover:bg-white/10 hover:text-white"
+                    ? "bg-gradient-to-r from-primary/25 to-transparent text-white before:absolute before:inset-y-1.5 before:left-0 before:w-[3px] before:rounded-full before:bg-primary before:shadow-[0_0_10px_var(--primary)] [&_svg]:text-primary"
+                    : "text-neutral-400 hover:bg-white/5 hover:text-white"
                 )}
               >
                 {item.icon}
