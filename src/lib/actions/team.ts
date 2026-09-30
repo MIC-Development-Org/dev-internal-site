@@ -9,18 +9,36 @@ import { getSettings } from "@/lib/data/settings";
 import { TEAM_MIN_MEMBERS, TEAM_MAX_MEMBERS, TEAM_MIN_SENIORS, TEAM_MAX_SENIORS } from "@/lib/data/teams";
 import { ALLOWED_EMAIL_DOMAIN } from "@/auth";
 import { isDeadlinePassed } from "@/lib/deadline";
+import { fieldError, type ActionState } from "@/lib/actions/state";
+import { LIMITS, formString, parseList, withinLength } from "@/lib/validation";
 
-export type ActionState = { error?: string; success?: boolean };
+// Best-effort, per-instance throttle for teammate lookups (the endpoint reveals whether an email is registered).
+const LOOKUP_WINDOW_MS = 60_000;
+const LOOKUP_MAX_PER_WINDOW = 30;
+const lookupHits = new Map<string, number[]>();
+
+function isLookupThrottled(userId: string): boolean {
+  const now = Date.now();
+  const recent = (lookupHits.get(userId) ?? []).filter((t) => now - t < LOOKUP_WINDOW_MS);
+  recent.push(now);
+  lookupHits.set(userId, recent);
+  return recent.length > LOOKUP_MAX_PER_WINDOW;
+}
+
+export type { ActionState } from "@/lib/actions/state";
 
 export type TeammateLookup =
   | { found: false }
   | { found: true; name: string; role: string; photoUrl?: string; onAnotherTeam: boolean };
 
 export async function lookupTeammate(email: string): Promise<TeammateLookup> {
-  await requireUser();
-  await connectToDatabase();
+  const me = await requireUser();
+  if (isLookupThrottled(String(me._id))) return { found: false };
 
-  const normalized = email.trim().toLowerCase();
+  const normalized = String(email ?? "").trim().toLowerCase();
+  if (normalized.length > 254 || !normalized.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`)) return { found: false };
+
+  await connectToDatabase();
   const user = await UserModel.findOne({ email: normalized })
     .select("name role photoUrl teamId")
     .lean();
@@ -49,31 +67,29 @@ export async function createTeam(_prevState: ActionState, formData: FormData): P
     return { error: "Team formation is closed. Contact an admin to be assigned to a team." };
   }
 
-  const name = String(formData.get("name") ?? "").trim();
-  const emailsRaw = String(formData.get("emails") ?? "");
-  const teammateEmails = Array.from(
-    new Set(
-      emailsRaw
-        .split(/[\n,]/)
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean)
-    )
-  ).filter((e) => e !== user.email);
+  const name = formString(formData, "name");
+  const teammateEmails = parseList(formString(formData, "emails").toLowerCase(), /[\n,]/).filter(
+    (e) => e !== user.email
+  );
 
-  if (!name) return { error: "Team name is required." };
+  if (!name) return fieldError("name", "Team name is required.");
+  if (!withinLength(name, LIMITS.name)) return fieldError("name", `Team name must be ${LIMITS.name} characters or fewer.`);
+  if (teammateEmails.length + 1 > TEAM_MAX_MEMBERS) {
+    return fieldError("emails", `Teams can have at most ${TEAM_MAX_MEMBERS} members.`);
+  }
 
   const invalidDomain = teammateEmails.find((e) => !e.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`));
-  if (invalidDomain) return { error: `"${invalidDomain}" is not a VIT student email.` };
+  if (invalidDomain) return fieldError("emails", `"${invalidDomain}" is not a VIT student email.`);
 
   const totalSize = 1 + teammateEmails.length;
   if (totalSize < TEAM_MIN_MEMBERS || totalSize > TEAM_MAX_MEMBERS) {
-    return { error: `Teams must have ${TEAM_MIN_MEMBERS}-${TEAM_MAX_MEMBERS} members (you entered ${totalSize}).` };
+    return fieldError("emails", `Teams must have ${TEAM_MIN_MEMBERS}-${TEAM_MAX_MEMBERS} members (you entered ${totalSize}).`);
   }
 
   const existingTeammates = await UserModel.find({ email: { $in: teammateEmails } });
   const alreadyTeamed = existingTeammates.filter((u) => u.teamId);
   if (alreadyTeamed.length > 0) {
-    return { error: `Already on a team: ${alreadyTeamed.map((u) => u.email).join(", ")}` };
+    return fieldError("emails", `Already on a team: ${alreadyTeamed.map((u) => u.email).join(", ")}`);
   }
 
   const existingByEmail = new Map(existingTeammates.map((u) => [u.email, u]));
@@ -85,9 +101,7 @@ export async function createTeam(_prevState: ActionState, formData: FormData): P
     }).length;
 
   if (seniorCount < TEAM_MIN_SENIORS || seniorCount > TEAM_MAX_SENIORS) {
-    return {
-      error: `Teams need ${TEAM_MIN_SENIORS}-${TEAM_MAX_SENIORS} seniors (this roster has ${seniorCount}).`,
-    };
+    return fieldError("emails", `Teams need ${TEAM_MIN_SENIORS}-${TEAM_MAX_SENIORS} seniors (this roster has ${seniorCount}).`);
   }
 
   // Create placeholder accounts for teammates who haven't logged in yet.
@@ -114,7 +128,17 @@ export async function createTeam(_prevState: ActionState, formData: FormData): P
     points: 0,
   });
 
-  await UserModel.updateMany({ _id: { $in: allMemberIds } }, { $set: { teamId: team._id } });
+  // Only claim members who are still unassigned; if anyone was grabbed by another team in the
+  // meantime, roll this team back instead of leaving members double-booked.
+  const claimed = await UserModel.updateMany(
+    { _id: { $in: allMemberIds }, teamId: null },
+    { $set: { teamId: team._id } }
+  );
+  if (claimed.modifiedCount !== allMemberIds.length) {
+    await UserModel.updateMany({ teamId: team._id }, { $set: { teamId: null } });
+    await TeamModel.findByIdAndDelete(team._id);
+    return { error: "A teammate joined another team while you were submitting. Please try again." };
+  }
 
   revalidatePath("/dashboard/team");
   return { success: true };

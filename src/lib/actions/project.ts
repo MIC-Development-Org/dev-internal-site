@@ -5,8 +5,9 @@ import { requireUser } from "@/lib/dal";
 import { connectToDatabase } from "@/lib/mongodb";
 import { TeamModel } from "@/models/Team";
 import { ProjectModel } from "@/models/Project";
-import type { ActionState } from "@/lib/actions/team";
+import { fieldError, type ActionState } from "@/lib/actions/state";
 import { parseGithubRepoUrl, parseHttpUrl } from "@/lib/url";
+import { LIMITS, formString, parseObjectId, parseTechStack } from "@/lib/validation";
 
 /**
  * Claim an available pool project for the user's team.
@@ -27,18 +28,30 @@ export async function claimProject(_prevState: ActionState, formData: FormData):
     return { error: "Your team already has a project assigned." };
   }
 
-  const projectId = String(formData.get("projectId") ?? "");
+  const projectId = parseObjectId(formData.get("projectId"));
   if (!projectId) return { error: "Project ID is required." };
 
-  const project = await ProjectModel.findById(projectId);
-  if (!project) return { error: "Project not found." };
-  if (project.teamId) return { error: "This project has already been claimed by another team." };
+  // Atomic claim: only succeeds if the project is still unclaimed, so two teams
+  // racing for the same project can't both win.
+  const project = await ProjectModel.findOneAndUpdate(
+    { _id: projectId, teamId: null },
+    { $set: { teamId: team._id } },
+    { new: true }
+  );
+  if (!project) {
+    const exists = await ProjectModel.exists({ _id: projectId });
+    return { error: exists ? "This project has already been claimed by another team." : "Project not found." };
+  }
 
-  project.teamId = team._id;
-  await project.save();
-
-  team.projectId = project._id;
-  await team.save();
+  // Likewise only attach if the team still has no project (guards double-submit).
+  const attached = await TeamModel.findOneAndUpdate(
+    { _id: team._id, projectId: null },
+    { $set: { projectId: project._id } }
+  );
+  if (!attached) {
+    await ProjectModel.updateOne({ _id: project._id }, { $set: { teamId: null } });
+    return { error: "Your team already has a project assigned." };
+  }
 
   revalidatePath("/dashboard/project");
   revalidatePath("/dashboard/showcase");
@@ -68,24 +81,21 @@ export async function updateProjectGithub(_prevState: ActionState, formData: For
   const project = await ProjectModel.findById(team.projectId);
   if (!project) return { error: "Project not found." };
 
-  const rawRepoUrl = String(formData.get("repoUrl") ?? "").trim();
-  const rawLiveUrl = String(formData.get("liveUrl") ?? "").trim();
-  const techStackRaw = String(formData.get("techStack") ?? "");
-  const techStack = techStackRaw
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
+  const rawRepoUrl = formString(formData, "repoUrl");
+  const rawLiveUrl = formString(formData, "liveUrl");
+  const techStack = parseTechStack(formString(formData, "techStack"));
+  if (!techStack) return fieldError("techStack", `Up to ${LIMITS.techItems} items of ${LIMITS.techItem} characters each.`);
 
   if (!rawRepoUrl) {
-    return { error: "GitHub repository URL is required." };
+    return fieldError("repoUrl", "GitHub repository URL is required.");
   }
   const repoUrl = parseGithubRepoUrl(rawRepoUrl);
   if (!repoUrl) {
-    return { error: "Enter a GitHub repository URL like https://github.com/owner/repo." };
+    return fieldError("repoUrl", "Enter a GitHub repository URL like https://github.com/owner/repo.");
   }
   const liveUrl = rawLiveUrl ? parseHttpUrl(rawLiveUrl) : "";
   if (liveUrl === null) {
-    return { error: "Live deployment URL must start with http:// or https://." };
+    return fieldError("liveUrl", "Live URL must start with http:// or https://.");
   }
 
   project.repoUrl = repoUrl;
@@ -103,7 +113,7 @@ export async function updateProjectGithub(_prevState: ActionState, formData: For
 /**
  * Release / unclaim a project so the team can choose another one (allowed if still in submitted status).
  */
-export async function releaseProject(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+export async function releaseProject(): Promise<ActionState> {
   const user = await requireUser();
   if (!user.teamId) return { error: "You must be in a team." };
 
@@ -131,5 +141,42 @@ export async function releaseProject(_prevState: ActionState, formData: FormData
   revalidatePath("/dashboard/project");
   revalidatePath("/dashboard/showcase");
   revalidatePath("/admin/projects");
+  return { success: true };
+}
+
+/**
+ * Resubmit a project for review after changes were requested. Leader only.
+ * The optional note is stored as a team reply next to the admin feedback.
+ */
+export async function resubmitProject(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requireUser();
+  if (!user.teamId) return { error: "You must be in a team." };
+
+  await connectToDatabase();
+  const team = await TeamModel.findById(user.teamId);
+  if (!team) return { error: "Team not found." };
+  if (String(team.leaderId) !== String(user._id)) {
+    return { error: "Only the team leader can resubmit the project." };
+  }
+  if (!team.projectId) return { error: "No project assigned to your team." };
+
+  const note = formString(formData, "note");
+  if (note.length > LIMITS.note) return fieldError("note", `Note must be ${LIMITS.note} characters or fewer.`);
+
+  // Atomic transition so a double-click or a concurrent admin update can't be overwritten.
+  const updated = await ProjectModel.findOneAndUpdate(
+    { _id: team.projectId, status: "changes_requested" },
+    {
+      $set: { status: "under_review" },
+      $push: {
+        feedback: { note: note || "Changes made — ready for another look.", author: "team", byUserId: user._id, at: new Date() },
+      },
+    }
+  );
+  if (!updated) return { error: "This project isn't waiting on changes." };
+
+  revalidatePath("/dashboard/project");
+  revalidatePath("/admin/projects");
+  revalidatePath(`/admin/projects/${team.projectId}`);
   return { success: true };
 }

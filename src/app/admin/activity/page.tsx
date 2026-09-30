@@ -14,6 +14,7 @@ const ACTION_LABELS: Record<AuditAction, string> = {
   project_updated: "Project updated",
   project_deleted: "Project deleted",
   settings_updated: "Settings",
+  points_awarded: "Points",
 };
 
 export default async function AdminActivityPage() {

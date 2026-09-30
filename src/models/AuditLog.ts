@@ -10,6 +10,7 @@ export const AUDIT_ACTIONS = [
   "project_updated",
   "project_deleted",
   "settings_updated",
+  "points_awarded",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
