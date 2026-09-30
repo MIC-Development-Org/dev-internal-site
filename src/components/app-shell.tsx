@@ -31,6 +31,15 @@ export type AppShellProps = {
 
 const COLLAPSE_STORAGE_KEY = "pitlane-sidebar-collapsed";
 
+function BrandLogo({ brand, className }: { brand: string; className?: string }) {
+  return (
+    <Link href="/dashboard" aria-label={brand} className={cn("flex shrink-0 items-center", className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/mic-logo.png" alt={brand} className="h-full w-auto select-none" />
+    </Link>
+  );
+}
+
 export function AppShell({
   navItems,
   brand,
@@ -71,7 +80,7 @@ export function AppShell({
     <div className="min-h-svh bg-background md:flex">
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-black px-4 text-white md:hidden">
         <div className="flex items-baseline gap-2">
-          <span className="font-condensed text-lg font-extrabold uppercase tracking-[0.18em] text-primary text-glow">{brand}</span>
+          <BrandLogo brand={brand} className="h-6" />
           {brandSubtitle && (
             <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
               {brandSubtitle}
@@ -104,14 +113,7 @@ export function AppShell({
         )}
       >
         <div className="flex h-14 items-center justify-between px-4">
-          <span
-            className={cn(
-              "font-condensed text-xl font-extrabold uppercase tracking-[0.18em] text-primary text-glow",
-              collapsed && "md:hidden"
-            )}
-          >
-            {brand}
-          </span>
+          <BrandLogo brand={brand} className={cn("h-7", collapsed && "md:hidden")} />
           <button
             type="button"
             aria-label="Collapse sidebar"
