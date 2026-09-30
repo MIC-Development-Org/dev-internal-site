@@ -9,6 +9,8 @@ const LABELS: Record<UserRole, string> = {
 };
 
 export function RoleBadge({ role, className }: { role: UserRole; className?: string }) {
+  // Roles outside the member set (e.g. legacy "admin" records) have no badge.
+  if (!LABELS[role]) return null;
   return (
     <Badge 
       variant="outline"
