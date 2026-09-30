@@ -7,11 +7,13 @@ import { EmptyState } from "@/components/f1/empty-state";
 import { ProjectStatusBadge } from "@/components/project-status-badge";
 import { ClaimProjectCard } from "@/components/dashboard/claim-project-card";
 import { ProjectRepoForm } from "@/components/dashboard/project-repo-form";
+import { ResubmitProjectForm } from "@/components/dashboard/resubmit-project-form";
 import { ReleaseProjectButton } from "@/components/dashboard/release-project-button";
 import { AlertTriangle, ArrowUpRight, ChevronDown, FileText, Globe, Pencil, Radio } from "lucide-react";
 import { safeHref } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { getProjectProgressPercent, type ProjectStatus } from "@/lib/constants/project-status";
+import { getProjectProgressPercent } from "@/lib/constants/project-status";
+import { PROJECT_STAGES, StageStrip, stageIndexFor } from "@/components/dashboard/stage-strip";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -98,13 +100,13 @@ export default async function ProjectPage() {
 
   // 3. Team HAS an assigned project
   const changesRequested = project.status === "changes_requested";
-  const effectiveStatus = changesRequested ? "approved" : project.status;
-  const stageIndex = STAGES.findIndex((s) => s.key === effectiveStatus);
-  const nextStage = STAGES[stageIndex + 1];
+  const stageIndex = stageIndexFor(project.status);
+  const nextStage = project.status === "completed" ? undefined : PROJECT_STAGES[stageIndex + 1];
   const progress = getProjectProgressPercent(project.status);
   const repoLabel = repoHref ? repoHref.replace(/^https?:\/\/(www\.)?github\.com\//i, "").replace(/\/$/, "") : null;
   const liveLabel = liveHref ? liveHref.replace(/^https?:\/\//i, "").replace(/\/$/, "") : null;
   const feedback = (project.feedback ?? []).slice().reverse();
+  const latestAdminNote = feedback.find((f) => f.author !== "team");
 
   return (
     <div className="space-y-6">
@@ -150,33 +152,7 @@ export default async function ProjectPage() {
                 )}
               </p>
             </div>
-            <ol className="grid grid-cols-5 gap-1">
-              {STAGES.map((s, i) => {
-                const done = i < stageIndex || project.status === "completed";
-                const current = i === stageIndex && project.status !== "completed";
-                return (
-                  <li key={s.key} className="space-y-1.5">
-                    <div
-                      className={cn(
-                        "h-2 rounded-sm",
-                        done && "bg-primary",
-                        current && (changesRequested ? "bg-amber-400" : "animate-pulse bg-primary/60"),
-                        !done && !current && "bg-muted"
-                      )}
-                    />
-                    <p
-                      className={cn(
-                        "truncate font-mono text-[9px] uppercase tracking-widest sm:text-[10px]",
-                        done || current ? "text-foreground" : "text-muted-foreground"
-                      )}
-                    >
-                      <span className="hidden sm:inline">{String(i + 1).padStart(2, "0")} </span>
-                      {s.label}
-                    </p>
-                  </li>
-                );
-              })}
-            </ol>
+            <StageStrip status={project.status} />
           </div>
         </div>
       </section>
@@ -184,9 +160,25 @@ export default async function ProjectPage() {
       {changesRequested && (
         <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-amber-300">Changes requested by race control</p>
-            <p className="text-xs text-muted-foreground">Check the latest radio message below and update your project.</p>
+            {latestAdminNote && (
+              <p className="mt-1 whitespace-pre-wrap rounded-lg border border-amber-500/20 bg-background/40 px-3 py-2 text-sm text-zinc-200">
+                {latestAdminNote.note}
+              </p>
+            )}
+            {isLeader ? (
+              <>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Update your repo or links, then send the project back for review.
+                </p>
+                <ResubmitProjectForm />
+              </>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Your team leader will resubmit the project once the changes are made.
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -232,7 +224,7 @@ export default async function ProjectPage() {
                       )}
                     />
                     <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      Race control · {new Date(f.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                      {f.author === "team" ? "Your team" : "Race control"} · {new Date(f.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                     </p>
                     <p className="mt-1 rounded-lg rounded-tl-none border border-border bg-muted/30 px-3 py-2 text-sm text-zinc-200">
                       {f.note}
@@ -288,14 +280,6 @@ export default async function ProjectPage() {
     </div>
   );
 }
-
-const STAGES: { key: ProjectStatus; label: string }[] = [
-  { key: "submitted", label: "Submitted" },
-  { key: "under_review", label: "Review" },
-  { key: "approved", label: "Approved" },
-  { key: "in_progress", label: "In progress" },
-  { key: "completed", label: "Completed" },
-];
 
 function LinkTile({
   href,
