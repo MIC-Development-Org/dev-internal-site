@@ -38,7 +38,7 @@ export default async function AdminProjectDetailPage({ params }: PageProps<"/adm
             Back to Projects
           </Link>
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <h1 className="text-2xl font-bold">{project.title}</h1>
+            <h1 className="page-title">{project.title}</h1>
             <ProjectStatusBadge status={project.status} />
           </div>
           <p className="text-sm text-muted-foreground">

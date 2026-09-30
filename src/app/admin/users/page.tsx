@@ -10,7 +10,7 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">User Management</h1>
+        <h1 className="page-title">User Management</h1>
         <p className="text-sm text-muted-foreground">{users.length} members registered.</p>
       </div>
 

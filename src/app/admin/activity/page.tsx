@@ -22,7 +22,7 @@ export default async function AdminActivityPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Activity Log</h1>
+        <h1 className="page-title">Activity Log</h1>
         <p className="text-sm text-muted-foreground">
           Role changes, team edits, and project status changes made by admins. Points awards are
           logged separately under Leaderboard Config.

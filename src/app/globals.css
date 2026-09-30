@@ -7,10 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: Inter, system-ui, sans-serif;
-  --font-mono: JetBrains Mono, monospace;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-heading: var(--font-sans);
-  --font-condensed: "Barlow Condensed", sans-serif;
+  --font-condensed: var(--font-barlow), "Arial Narrow", sans-serif;
 
   /* Spacing scale (design tokens) */
   --spacing-gutter: 0.75rem;
@@ -57,7 +57,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --font-serif: Georgia, serif;
-  --radius: 0.125rem;
+  --radius: 0.5rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
@@ -107,7 +107,7 @@
   --chart-3: oklch(0.3715 0 0);
   --chart-4: oklch(0.5555 0 0);
   --chart-5: oklch(0.7155 0 0);
-  --radius: 0.125rem;
+  --radius: 0.5rem;
   --sidebar: oklch(1.0000 0 0);
   --sidebar-foreground: oklch(0 0 0);
   --sidebar-primary: oklch(0.6332 0.2527 30.0983);
@@ -117,9 +117,7 @@
   --sidebar-border: oklch(0.8699 0 0);
   --sidebar-ring: oklch(0.6332 0.2527 30.0983);
   --destructive-foreground: oklch(1.0000 0 0);
-  --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: JetBrains Mono, monospace;
   --shadow-color: #000000;
   --shadow-opacity: 0.1;
   --shadow-blur: 4px;
@@ -140,11 +138,11 @@
 }
 
 .dark {
-  --background: oklch(0 0 0);
+  --background: oklch(0.1 0 0);
   --foreground: oklch(1.0000 0 0);
   --card: oklch(0.1448 0 0);
   --card-foreground: oklch(1.0000 0 0);
-  --popover: oklch(0 0 0);
+  --popover: oklch(0.14 0 0);
   --popover-foreground: oklch(1.0000 0 0);
   --primary: oklch(0.6332 0.2527 30.0983);
   --primary-foreground: oklch(1.0000 0 0);
@@ -154,7 +152,7 @@
   --muted-foreground: oklch(0.7155 0 0);
   --accent: oklch(0.6332 0.2527 30.0983);
   --accent-foreground: oklch(1.0000 0 0);
-  --destructive: oklch(0.6332 0.2527 30.0983);
+  --destructive: oklch(0.72 0.19 25);
   --border: oklch(0.2686 0 0);
   --input: oklch(0.2686 0 0);
   --ring: oklch(0.6332 0.2527 30.0983);
@@ -163,7 +161,7 @@
   --chart-3: oklch(0.3715 0 0);
   --chart-4: oklch(0.7155 0 0);
   --chart-5: oklch(0.4386 0 0);
-  --sidebar: oklch(0 0 0);
+  --sidebar: oklch(0.08 0 0);
   --sidebar-foreground: oklch(1.0000 0 0);
   --sidebar-primary: oklch(0.6332 0.2527 30.0983);
   --sidebar-primary-foreground: oklch(1.0000 0 0);
@@ -172,10 +170,8 @@
   --sidebar-border: oklch(0.2686 0 0);
   --sidebar-ring: oklch(0.6332 0.2527 30.0983);
   --destructive-foreground: oklch(1.0000 0 0);
-  --radius: 0.125rem;
-  --font-sans: Inter, system-ui, sans-serif;
+  --radius: 0.5rem;
   --font-serif: Georgia, serif;
-  --font-mono: JetBrains Mono, monospace;
   --shadow-color: #ff1801;
   --shadow-opacity: 0.15;
   --shadow-blur: 15px;
@@ -330,4 +326,112 @@
   .animate-smoke {
     animation: smoke-in 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+}
+
+/* ---------------------------------------------------------------
+   Pit Lane visual language — shared surfaces and accents
+   --------------------------------------------------------------- */
+
+@layer base {
+  body {
+    background-image:
+      radial-gradient(60rem 28rem at 85% -10%, oklch(0.6332 0.2527 30 / 0.10), transparent 60%),
+      radial-gradient(40rem 24rem at -10% 110%, oklch(0.6332 0.2527 30 / 0.06), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: oklch(0.6332 0.2527 30 / 0.45);
+    color: white;
+  }
+}
+
+/* Page title: condensed caps with a red pit-lane tick. */
+@utility page-title {
+  font-family: var(--font-condensed);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  &::before {
+    content: "";
+    width: 5px;
+    height: 0.85em;
+    border-radius: 2px;
+    background: var(--primary);
+    box-shadow: 0 0 14px var(--primary);
+    transform: skewX(-18deg);
+    flex-shrink: 0;
+  }
+}
+
+/* Section heading used above groups of cards. */
+@utility section-title {
+  font-family: var(--font-condensed);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  &::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+}
+
+/* Raised glass-carbon panel with a red top edge. */
+@utility surface {
+  position: relative;
+  background:
+    linear-gradient(180deg, oklch(1 0 0 / 0.045), oklch(1 0 0 / 0) 40%),
+    var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 30px -18px oklch(0 0 0 / 0.8);
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary), transparent 65%);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+}
+
+@utility surface-hover {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: oklch(0.6332 0.2527 30 / 0.55);
+    box-shadow: 0 16px 36px -16px oklch(0.6332 0.2527 30 / 0.35);
+  }
+}
+
+/* Faint blueprint grid for hero-ish panels. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@utility text-glow {
+  text-shadow: 0 0 24px oklch(0.6332 0.2527 30 / 0.55);
+}
+
+@utility text-gradient-brand {
+  background: linear-gradient(90deg, #fff, oklch(0.78 0.17 30));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

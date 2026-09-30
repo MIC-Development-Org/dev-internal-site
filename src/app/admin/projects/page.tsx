@@ -29,7 +29,7 @@ export default async function AdminProjectsPage({ searchParams }: PageProps<"/ad
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Project Management</h1>
+          <h1 className="page-title">Project Management</h1>
           <p className="text-sm text-muted-foreground">
             Create, assign, review, and manage department projects.
           </p>
