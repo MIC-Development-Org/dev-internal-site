@@ -7,7 +7,7 @@ import { ProjectStatusBadge } from "@/components/project-status-badge";
 import { ProjectStatusForm } from "@/components/admin/project-status-form";
 import { EditProjectForm } from "@/components/admin/edit-project-form";
 import { DeleteProjectButton } from "@/components/admin/delete-project-button";
-import { ArrowLeft, Users, Shield, User } from "lucide-react";
+import { ArrowLeft, Users, Shield } from "lucide-react";
 
 export default async function AdminProjectDetailPage({ params }: PageProps<"/admin/projects/[id]">) {
   const { id } = await params;
@@ -167,7 +167,7 @@ export default async function AdminProjectDetailPage({ params }: PageProps<"/adm
                     >
                       <p className="text-zinc-200">{f.note}</p>
                       <p className="mt-1.5 text-xs text-muted-foreground font-mono">
-                        {new Date(f.at).toLocaleString()}
+                        {f.author === "team" ? "Team reply" : "Race control"} · {new Date(f.at).toLocaleString()}
                       </p>
                     </div>
                   ))}
