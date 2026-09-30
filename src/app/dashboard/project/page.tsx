@@ -40,7 +40,7 @@ export default async function ProjectPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">My Project</h1>
+          <h1 className="page-title">My Project</h1>
           <p className="text-sm text-muted-foreground">Submit and track your team's project.</p>
         </div>
         <EmptyState
@@ -67,7 +67,7 @@ export default async function ProjectPage() {
       <div className="space-y-6">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Pick a Project</h1>
+            <h1 className="page-title">Pick a Project</h1>
             <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-semibold text-red-500">
               Team: {team.name}
             </span>
@@ -100,7 +100,7 @@ export default async function ProjectPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{project.title}</h1>
+            <h1 className="page-title">{project.title}</h1>
             <ProjectStatusBadge status={project.status} />
           </div>
           <p className="text-xs text-muted-foreground">

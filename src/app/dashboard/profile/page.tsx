@@ -15,7 +15,7 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">My Profile</h1>
+        <h1 className="page-title">My Profile</h1>
         <p className="text-sm text-muted-foreground">How other members see you.</p>
       </div>
 

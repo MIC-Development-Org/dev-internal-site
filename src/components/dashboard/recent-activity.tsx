@@ -16,17 +16,17 @@ function formatRelative(at: Date) {
 export function RecentActivity({ activity }: { activity: ActivityEntry[] }) {
   return (
     <div>
-      <h2 className="mb-3 text-label-caps text-muted-foreground">Recent Activity</h2>
+      <h2 className="section-title mb-3">Recent Activity</h2>
       {activity.length === 0 ? (
         <p className="text-sm text-muted-foreground">No activity yet.</p>
       ) : (
-        <ul>
+        <ul className="surface divide-y divide-border/60 px-4">
           {activity.map((entry, i) => (
             <li
               key={i}
-              className="flex items-start gap-3 border-b border-border/60 py-2.5 last:border-0"
+              className="flex items-start gap-3 py-3"
             >
-              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" aria-hidden="true" />
               <p className="flex-1 text-sm text-foreground">{entry.label}</p>
               <span className="shrink-0 text-xs text-muted-foreground">{formatRelative(entry.at)}</span>
             </li>

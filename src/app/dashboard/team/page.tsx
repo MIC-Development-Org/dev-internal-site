@@ -31,7 +31,7 @@ export default async function TeamPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold">Team Formation</h1>
+            <h1 className="page-title">Team Formation</h1>
             <p className="text-sm text-muted-foreground">
               Create your team and add your teammates before team formation closes.
             </p>
@@ -73,7 +73,7 @@ export default async function TeamPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">{team.name}</h1>
+          <h1 className="page-title">{team.name}</h1>
           <p className="text-sm text-muted-foreground">Your team members.</p>
         </div>
         <div className="text-right">

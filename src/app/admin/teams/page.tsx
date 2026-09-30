@@ -11,7 +11,7 @@ export default async function AdminTeamsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Team Management</h1>
+        <h1 className="page-title">Team Management</h1>
         <p className="text-sm text-muted-foreground">{teams.length} teams created.</p>
       </div>
 

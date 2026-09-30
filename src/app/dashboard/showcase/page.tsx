@@ -18,7 +18,7 @@ export default async function ShowcasePage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Projects</h1>
+        <h1 className="page-title">Projects</h1>
         <p className="text-sm text-muted-foreground">Explore projects built by the MIC Development Department.</p>
       </div>
 
