@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { connectToDatabase } from "@/lib/mongodb";
 import { UserModel, type UserRole } from "@/models/User";
-import { AdminModel } from "@/models/Admin";
+import { isAdminEmail } from "@/lib/admin-check";
 
 export const ALLOWED_EMAIL_DOMAIN = "vitstudent.ac.in";
 
@@ -13,13 +13,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
-  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+  trustHost: true,
+  // Short-lived JWTs bound how long a stale role/team/admin flag can live.
+  session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   pages: {
     signIn: "/login",
   },
   callbacks: {
     async signIn({ profile }) {
+      if (profile?.email_verified === false) return false;
       const email = profile?.email?.toLowerCase();
       if (!email || !email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`)) return false;
 
@@ -53,8 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Check admin status from the dedicated AdminRecord collection.
       // An email in this collection has admin access regardless of their
       // User.role value. The two are completely independent.
-      const adminExists = await AdminModel.exists({ email: token.email });
-      token.isAdmin = adminExists !== null;
+      token.isAdmin = await isAdminEmail(token.email);
 
       return token;
     },

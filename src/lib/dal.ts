@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { UserModel, type User } from "@/models/User";
+import { isAdminEmail } from "@/lib/admin-check";
 
 export const getCurrentUser = cache(async (): Promise<User | null> => {
   const session = await auth();
@@ -23,20 +24,17 @@ export async function requireUser(): Promise<User> {
 /**
  * Guards admin-only routes.
  *
- * Admin access is determined by the AdminRecord collection, NOT by the
- * user's organizational role. The JWT callback stamps `isAdmin` on the
- * session token at sign-in time, so no extra DB query is needed here.
+ * Admin access is determined by the Admin collection, NOT by the user's
+ * organizational role. The allowlist is re-checked on every call (one indexed
+ * lookup) so revoking an admin takes effect immediately instead of waiting for
+ * their JWT to expire.
  */
 export async function requireAdmin(): Promise<User> {
-  const session = await auth();
-
-  // Not authenticated at all → send to sign-in
-  if (!session?.user?.id) redirect("/login");
-
-  // Authenticated but not in the AdminRecord table → member dashboard
-  if (!session.user.isAdmin) redirect("/dashboard");
-
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  // Authenticated but not on the admin allowlist → member dashboard
+  if (!(await isAdminEmail(user.email))) redirect("/dashboard");
+
   return user;
 }
