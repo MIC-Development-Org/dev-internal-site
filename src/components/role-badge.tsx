@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import type { UserRole } from "@/lib/constants/roles";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 
 const LABELS: Record<UserRole, string> = {
-  lead: "TEAM LEAD",
+  lead: "DEPARTMENT LEAD",
   senior: "SENIOR MEMBER",
   fresher: "JUNIOR MEMBER",
 };

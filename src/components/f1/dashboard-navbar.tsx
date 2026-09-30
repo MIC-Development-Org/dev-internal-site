@@ -30,19 +30,16 @@ export function DashboardNavbar({
   return (
     <header className="absolute inset-x-0 top-0 z-20">
       <div className="flex h-16 items-center justify-between px-6 md:px-10">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
+        <Link href="/dashboard" aria-label="MIC dashboard" className="flex items-center">
           <Image
             src="/mic-logo.png"
-            alt="MIC Logo"
+            alt="MIC"
             width={120}
             height={45}
             unoptimized
             style={{ mixBlendMode: "screen" }}
             className="h-7 w-auto"
           />
-          <span className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-white">
-            MIC
-          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">

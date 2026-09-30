@@ -11,6 +11,8 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-card/50 px-6 py-16 text-center">
+      {/* Decorative local asset; intrinsic size is set via CSS. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/f1-car-empty.png"
         alt=""
