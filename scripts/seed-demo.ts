@@ -5,6 +5,11 @@
  *     npx tsx scripts/seed-demo.ts            # create / refresh demo data
  *   MONGODB_URI=... ME_EMAIL=... PARTNER_EMAIL=... npx tsx scripts/seed-demo.ts --clean
  *
+ * If both members already exist in the database, skip names/emails and look
+ * them up by a case-insensitive name fragment instead:
+ *   MONGODB_URI=... ME_MATCH=gowreesh PARTNER_MATCH=dhakshini npx tsx scripts/seed-demo.ts
+ *   MONGODB_URI=... ME_MATCH=gowreesh PARTNER_MATCH=dhakshini npx tsx scripts/seed-demo.ts --clean
+ *
  * Everything created is tagged so --clean can remove it: filler users use
  * @demo.invalid emails, the team is named "[DEMO] ...", projects are titled
  * "[DEMO] ...". The two real users are upserted by email (their profile is
@@ -26,6 +31,19 @@ function need(name: string): string {
   return v;
 }
 
+async function resolvePerson(prefix: "ME" | "PARTNER"): Promise<{ name: string; email: string }> {
+  const match = process.env[`${prefix}_MATCH`];
+  if (!match) return { name: need(`${prefix}_NAME`), email: need(`${prefix}_EMAIL`).toLowerCase() };
+  const escaped = match.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const found = await UserModel.find({ name: { $regex: escaped, $options: "i" } });
+  if (found.length !== 1) {
+    throw new Error(
+      `${prefix}_MATCH="${match}" matched ${found.length} users (${found.map((u) => u.email).join(", ")}); need exactly 1`
+    );
+  }
+  return { name: found[0].name, email: found[0].email };
+}
+
 async function clean(emails: string[]) {
   const team = await TeamModel.findOne({ name: TEAM_NAME });
   const demoUsers = await UserModel.find({ email: { $regex: `${DEMO_EMAIL_DOMAIN}$` } });
@@ -41,14 +59,8 @@ async function clean(emails: string[]) {
 }
 
 async function seed() {
-  const me = {
-    name: need("ME_NAME"),
-    email: need("ME_EMAIL").toLowerCase(),
-  };
-  const partner = {
-    name: need("PARTNER_NAME"),
-    email: need("PARTNER_EMAIL").toLowerCase(),
-  };
+  const me = await resolvePerson("ME");
+  const partner = await resolvePerson("PARTNER");
 
   const upsertReal = (p: { name: string; email: string }, role: "lead" | "senior" | "fresher", extra = {}) =>
     UserModel.findOneAndUpdate(
@@ -145,7 +157,7 @@ async function main() {
   await mongoose.connect(need("MONGODB_URI"));
   try {
     if (process.argv.includes("--clean")) {
-      await clean([need("ME_EMAIL").toLowerCase(), need("PARTNER_EMAIL").toLowerCase()]);
+      await clean([(await resolvePerson("ME")).email, (await resolvePerson("PARTNER")).email]);
     } else {
       await seed();
     }
