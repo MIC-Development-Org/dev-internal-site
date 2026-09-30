@@ -2,15 +2,16 @@ import Link from "next/link";
 import { requireUser } from "@/lib/dal";
 import { getMyTeam } from "@/lib/data/teams";
 import { getProjectForTeam, getAvailableProjects } from "@/lib/data/projects";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/f1/empty-state";
 import { ProjectStatusBadge } from "@/components/project-status-badge";
-import { ProjectProgressTracker } from "@/components/dashboard/project-progress-tracker";
 import { ClaimProjectCard } from "@/components/dashboard/claim-project-card";
 import { ProjectRepoForm } from "@/components/dashboard/project-repo-form";
 import { ReleaseProjectButton } from "@/components/dashboard/release-project-button";
-import { Globe, ExternalLink, FolderGit2 } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, ChevronDown, FileText, Globe, Pencil, Radio } from "lucide-react";
+import { safeHref } from "@/lib/url";
+import { cn } from "@/lib/utils";
+import { getProjectProgressPercent, type ProjectStatus } from "@/lib/constants/project-status";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -41,7 +42,7 @@ export default async function ProjectPage() {
       <div className="space-y-6">
         <div>
           <h1 className="page-title">My Project</h1>
-          <p className="text-sm text-muted-foreground">Submit and track your team's project.</p>
+          <p className="text-sm text-muted-foreground">Submit and track your team&apos;s project.</p>
         </div>
         <EmptyState
           title="No team joined yet"
@@ -58,6 +59,8 @@ export default async function ProjectPage() {
 
   const project = await getProjectForTeam(team._id);
   const isLeader = team.leaderId === String(user._id);
+  const repoHref = safeHref(project?.repoUrl);
+  const liveHref = safeHref(project?.liveUrl);
 
   // 2. Team has NO project assigned yet -> Show Available Projects Pool
   if (!project) {
@@ -94,153 +97,240 @@ export default async function ProjectPage() {
   }
 
   // 3. Team HAS an assigned project
+  const changesRequested = project.status === "changes_requested";
+  const effectiveStatus = changesRequested ? "approved" : project.status;
+  const stageIndex = STAGES.findIndex((s) => s.key === effectiveStatus);
+  const nextStage = STAGES[stageIndex + 1];
+  const progress = getProjectProgressPercent(project.status);
+  const repoLabel = repoHref ? repoHref.replace(/^https?:\/\/(www\.)?github\.com\//i, "").replace(/\/$/, "") : null;
+  const liveLabel = liveHref ? liveHref.replace(/^https?:\/\//i, "").replace(/\/$/, "") : null;
+  const feedback = (project.feedback ?? []).slice().reverse();
+
   return (
     <div className="space-y-6">
-      {/* ── HEADER ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="page-title">{project.title}</h1>
-            <ProjectStatusBadge status={project.status} />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Team: <span className="font-semibold text-zinc-300">{team.name}</span>
-          </p>
-        </div>
-
-        {isLeader && project.status === "submitted" && (
-          <ReleaseProjectButton />
-        )}
-      </div>
-
-      {/* ── PROGRESS TRACKER ── */}
-      <Card>
-        <CardContent className="overflow-x-auto pt-6">
-          <ProjectProgressTracker status={project.status} />
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left 2 Columns: Project Details & Feedback */}
-        <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Project Scope & Description</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm leading-relaxed text-zinc-300 whitespace-pre-wrap">
-                {project.description}
+      {/* ── HERO ── */}
+      <section className="surface relative overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-50"
+          style={{
+            background:
+              "repeating-linear-gradient(115deg, transparent 0 28px, color-mix(in oklch, var(--primary) 14%, transparent) 28px 34px)",
+            maskImage: "linear-gradient(to left, black, transparent)",
+          }}
+        />
+        <div className="relative space-y-6 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-primary">
+                Pit wall · <Link href="/dashboard/team" className="hover:underline">{team.name}</Link>
               </p>
+              <h1 className="page-title mt-1">{project.title}</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <ProjectStatusBadge status={project.status} />
+              {isLeader && project.status === "submitted" && <ReleaseProjectButton />}
+            </div>
+          </div>
 
-              {project.techStack && project.techStack.length > 0 && (
-                <div className="space-y-1.5 pt-2 border-t border-border/40">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Technologies
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.techStack.map((t) => (
-                      <span key={t} className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs text-zinc-200">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Feedback History */}
-          {project.feedback && project.feedback.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Admin Feedback History</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {project.feedback
-                  .slice()
-                  .reverse()
-                  .map((f, i) => (
+          {/* Lap strip */}
+          <div className="space-y-2">
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="font-condensed text-5xl font-extrabold italic tabular-nums leading-none">
+                {progress}
+                <span className="text-2xl text-muted-foreground">%</span>
+              </p>
+              <p className="text-right font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {nextStage ? (
+                  <>
+                    Next · <span className="text-foreground">{nextStage.label}</span>
+                  </>
+                ) : (
+                  <span className="text-emerald-400">Chequered flag</span>
+                )}
+              </p>
+            </div>
+            <ol className="grid grid-cols-5 gap-1">
+              {STAGES.map((s, i) => {
+                const done = i < stageIndex || project.status === "completed";
+                const current = i === stageIndex && project.status !== "completed";
+                return (
+                  <li key={s.key} className="space-y-1.5">
                     <div
-                      key={i}
-                      className="rounded-lg border border-border bg-muted/30 p-3 text-sm"
+                      className={cn(
+                        "h-2 rounded-sm",
+                        done && "bg-primary",
+                        current && (changesRequested ? "bg-amber-400" : "animate-pulse bg-primary/60"),
+                        !done && !current && "bg-muted"
+                      )}
+                    />
+                    <p
+                      className={cn(
+                        "truncate font-mono text-[9px] uppercase tracking-widest sm:text-[10px]",
+                        done || current ? "text-foreground" : "text-muted-foreground"
+                      )}
                     >
-                      <p className="text-zinc-200">{f.note}</p>
-                      <p className="mt-1.5 text-xs text-muted-foreground font-mono">
-                        {new Date(f.at).toLocaleString()}
-                      </p>
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-          )}
+                      <span className="hidden sm:inline">{String(i + 1).padStart(2, "0")} </span>
+                      {s.label}
+                    </p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         </div>
+      </section>
 
-        {/* Right Column: GitHub Repository Links */}
+      {changesRequested && (
+        <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
+          <div>
+            <p className="font-medium text-amber-300">Changes requested by race control</p>
+            <p className="text-xs text-muted-foreground">Check the latest radio message below and update your project.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        {/* ── LEFT: brief + radio ── */}
         <div className="space-y-6">
-          <Card className="h-fit">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <FolderGit2 className="size-4 text-red-500" />
-                <CardTitle className="text-base">Repository & Links</CardTitle>
+          <section className="surface space-y-4 p-5">
+            <h2 className="flex items-center gap-2 font-condensed text-xl font-bold uppercase tracking-wide">
+              <FileText className="size-4 text-primary" /> Mission brief
+            </h2>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">{project.description}</p>
+            {project.techStack && project.techStack.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 border-t border-border/60 pt-4">
+                {project.techStack.map((t) => (
+                  <span key={t} className="rounded-md border border-border bg-muted/40 px-2 py-0.5 font-mono text-xs text-zinc-200">
+                    {t}
+                  </span>
+                ))}
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isLeader ? (
-                <div>
-                  <ProjectRepoForm
-                    defaults={{
-                      repoUrl: project.repoUrl ?? "",
-                      liveUrl: project.liveUrl ?? "",
-                      techStack: project.techStack ?? [],
-                    }}
-                  />
-                </div>
-              ) : (
-                <div className="space-y-3 text-sm">
-                  {project.repoUrl ? (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">GitHub Repository:</p>
-                      <a
-                        href={project.repoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-mono text-zinc-200 hover:bg-muted hover:text-white"
-                      >
-                        <GithubIcon className="size-3.5" />
-                        <span className="truncate">{project.repoUrl}</span>
-                        <ExternalLink className="size-3 shrink-0" />
-                      </a>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                      <p>No GitHub repository link added yet.</p>
-                      <p className="mt-1 text-[11px] text-zinc-500">
-                        Your team leader can provide the repository URL above.
-                      </p>
-                    </div>
-                  )}
+            )}
+          </section>
 
-                  {project.liveUrl && (
-                    <div className="space-y-2 pt-2 border-t border-border/40">
-                      <p className="text-xs text-muted-foreground">Live Deployment:</p>
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-mono text-zinc-200 hover:bg-muted hover:text-white"
-                      >
-                        <Globe className="size-3.5 text-emerald-400" />
-                        <span className="truncate">{project.liveUrl}</span>
-                        <ExternalLink className="size-3 shrink-0" />
-                      </a>
-                    </div>
-                  )}
-                </div>
+          <section className="surface space-y-4 p-5">
+            <h2 className="flex items-center gap-2 font-condensed text-xl font-bold uppercase tracking-wide">
+              <Radio className="size-4 text-primary" /> Team radio
+              {feedback.length > 0 && (
+                <span className="font-mono text-xs font-normal text-muted-foreground">({feedback.length})</span>
               )}
-            </CardContent>
-          </Card>
+            </h2>
+            {feedback.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-xs text-muted-foreground">
+                No messages from race control yet. Admin feedback will appear here.
+              </p>
+            ) : (
+              <ol className="relative space-y-4 border-l border-border pl-5">
+                {feedback.map((f, i) => (
+                  <li key={i} className="relative">
+                    <span
+                      className={cn(
+                        "absolute -left-[1.6rem] top-1 size-2.5 rounded-full border-2 border-card",
+                        i === 0 ? "bg-primary" : "bg-muted-foreground"
+                      )}
+                    />
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Race control · {new Date(f.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                    </p>
+                    <p className="mt-1 rounded-lg rounded-tl-none border border-border bg-muted/30 px-3 py-2 text-sm text-zinc-200">
+                      {f.note}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </section>
         </div>
+
+        {/* ── RIGHT: garage links ── */}
+        <aside className="space-y-3 lg:sticky lg:top-6 lg:self-start">
+          <h2 className="font-condensed text-xl font-bold uppercase tracking-wide">Garage links</h2>
+
+          <LinkTile
+            href={repoHref}
+            label={repoLabel}
+            title="GitHub repository"
+            icon={<GithubIcon className="size-5" />}
+            emptyText={isLeader ? "Add your repo below." : "Your team leader hasn't added it yet."}
+          />
+          <LinkTile
+            href={liveHref}
+            label={liveLabel}
+            title="Live deployment"
+            icon={<Globe className="size-5 text-emerald-400" />}
+            emptyText="Not deployed yet."
+          />
+
+          {isLeader && (
+            <details open={!repoHref} className="surface group p-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between font-mono text-xs uppercase tracking-widest">
+                <span className="flex items-center gap-2">
+                  <Pencil className="size-3.5 text-primary" />
+                  {repoHref ? "Edit links" : "Submit links"}
+                </span>
+                <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="mt-4 border-t border-border pt-4">
+                <ProjectRepoForm
+                  defaults={{
+                    repoUrl: project.repoUrl ?? "",
+                    liveUrl: project.liveUrl ?? "",
+                    techStack: project.techStack ?? [],
+                  }}
+                />
+              </div>
+            </details>
+          )}
+        </aside>
       </div>
     </div>
+  );
+}
+
+const STAGES: { key: ProjectStatus; label: string }[] = [
+  { key: "submitted", label: "Submitted" },
+  { key: "under_review", label: "Review" },
+  { key: "approved", label: "Approved" },
+  { key: "in_progress", label: "In progress" },
+  { key: "completed", label: "Completed" },
+];
+
+function LinkTile({
+  href,
+  label,
+  title,
+  icon,
+  emptyText,
+}: {
+  href: string | null;
+  label: string | null;
+  title: string;
+  icon: React.ReactNode;
+  emptyText: string;
+}) {
+  const body = (
+    <>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{title}</span>
+        <span className={cn("block truncate text-sm", href ? "font-mono text-foreground" : "text-muted-foreground")}>
+          {href ? label : emptyText}
+        </span>
+      </span>
+      {href && <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />}
+    </>
+  );
+
+  if (!href) {
+    return <div className="flex items-center gap-3 rounded-xl border border-dashed border-border p-3">{body}</div>;
+  }
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="surface surface-hover group flex items-center gap-3 p-3">
+      {body}
+    </a>
   );
 }

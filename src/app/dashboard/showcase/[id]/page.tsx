@@ -5,11 +5,15 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProjectStatusBadge } from "@/components/project-status-badge";
 import { Button } from "@/components/ui/button";
+import { SHOWCASE_STATUSES } from "@/lib/constants/project-status";
+import { safeHref } from "@/lib/url";
 
 export default async function ShowcaseDetailPage({ params }: PageProps<"/dashboard/showcase/[id]">) {
   const { id } = await params;
   const project = await getProjectById(id);
-  if (!project || !["approved", "completed"].includes(project.status)) notFound();
+  if (!project || !SHOWCASE_STATUSES.includes(project.status)) notFound();
+  const repoHref = safeHref(project.repoUrl);
+  const liveHref = safeHref(project.liveUrl);
 
   await connectToDatabase();
   const team = await TeamModel.findById(project.teamId).select("name").lean();
@@ -38,9 +42,9 @@ export default async function ShowcaseDetailPage({ params }: PageProps<"/dashboa
             ))}
           </div>
           <div className="flex gap-2">
-            {project.repoUrl && (
+            {repoHref && (
               <Button
-                render={<a href={project.repoUrl} target="_blank" rel="noreferrer" />}
+                render={<a href={repoHref} target="_blank" rel="noopener noreferrer" />}
                 nativeButton={false}
                 variant="outline"
                 size="sm"
@@ -48,8 +52,8 @@ export default async function ShowcaseDetailPage({ params }: PageProps<"/dashboa
                 Repo
               </Button>
             )}
-            {project.liveUrl && (
-              <Button render={<a href={project.liveUrl} target="_blank" rel="noreferrer" />} nativeButton={false} size="sm">
+            {liveHref && (
+              <Button render={<a href={liveHref} target="_blank" rel="noopener noreferrer" />} nativeButton={false} size="sm">
                 Live
               </Button>
             )}
