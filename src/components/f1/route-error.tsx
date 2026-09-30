@@ -12,6 +12,8 @@ export function RouteError({ error, reset }: { error: Error & { digest?: string 
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-destructive/40 bg-destructive/5 px-6 py-16 text-center">
       <div className="relative">
+        {/* Decorative local asset; intrinsic size is set via CSS. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/f1-car-error.png"
           alt=""

@@ -34,6 +34,8 @@ export function RouteTransitionLoader() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeIn" }}
           >
+            {/* Decorative local asset; intrinsic size is set via CSS. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/f1-car-loader.png"
               alt=""

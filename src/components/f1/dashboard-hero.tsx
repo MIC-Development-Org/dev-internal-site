@@ -5,7 +5,7 @@ import { DashboardNavbar } from "@/components/f1/dashboard-navbar";
 import type { NavItem } from "@/components/app-shell";
 
 // Fraction of normal speed the background footage plays at.
-const PLAYBACK_RATE = 0.55;
+const PLAYBACK_RATE = 1;
 
 export function DashboardHero({
   videoSrc,

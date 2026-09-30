@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-import { CheckCircle, ShieldAlert, Sparkles } from "lucide-react";
+import { CheckCircle, ShieldAlert } from "lucide-react";
 import { claimProject } from "@/lib/actions/project";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubmitButton } from "@/components/submit-button";

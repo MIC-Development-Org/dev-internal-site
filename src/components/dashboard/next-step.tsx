@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { ProjectStatus } from "@/lib/constants/project-status";
 
 export type NextStepTeam = { isLeader: boolean } | null;
@@ -15,7 +12,7 @@ const PROJECT_STEP: Record<ProjectStatus, { message: string; ctaLabel: string }>
   completed: { message: "Your project is complete. Great work.", ctaLabel: "View Project" },
 };
 
-function getNextStep(team: NextStepTeam, project: NextStepProject) {
+export function getNextStep(team: NextStepTeam, project: NextStepProject) {
   if (!team) {
     return {
       message: "You're not part of a team yet. Create or join a team to get started.",
@@ -33,21 +30,4 @@ function getNextStep(team: NextStepTeam, project: NextStepProject) {
         };
   }
   return { ...PROJECT_STEP[project.status], ctaHref: "/dashboard/project" };
-}
-
-export function NextStep({ team, project }: { team: NextStepTeam; project: NextStepProject }) {
-  const step = getNextStep(team, project);
-
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-4 relative overflow-hidden rounded-xl border border-primary/30 border-l-4 border-l-primary bg-gradient-to-r from-primary/15 via-primary/5 to-transparent px-5 py-4 shadow-[0_0_30px_-12px_var(--primary)]">
-      <div>
-        <p className="text-label-caps text-primary">Next Step</p>
-        <p className="mt-1 text-sm text-foreground">{step.message}</p>
-      </div>
-      <Button render={<Link href={step.ctaHref} />} nativeButton={false} size="sm" className="shrink-0 gap-1.5">
-        {step.ctaLabel}
-        <ArrowRight className="size-4" />
-      </Button>
-    </div>
-  );
 }
