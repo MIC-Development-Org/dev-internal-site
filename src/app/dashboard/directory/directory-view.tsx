@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { SearchBox } from "@/components/list/search-box";
+import { buildHref, type SearchParams } from "@/lib/list-params";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/role-badge";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import type { UserRole } from "@/models/User";
 
 type Member = {
@@ -59,28 +59,16 @@ function getMemberNumber(id: string) {
 }
 
 function MemberCard({ member }: { member: Member }) {
-  const { name, id } = extractNameAndId(member.name);
+  const { name } = extractNameAndId(member.name);
   const memberNumber = getMemberNumber(member._id);
   const avatarColor = getAvatarColor(name);
   const techStack = member.techStack ?? [];
   const visibleTech = techStack.slice(0, 3);
   const extraTech = techStack.length - visibleTech.length;
 
-  const bgImage = member.role === "lead"
-    ? "/img1.png"
-    : member.role === "senior"
-      ? "/img2.png"
-      : "/img3.png";
-
   return (
     <Link href={`/dashboard/directory/${member._id}`} className="block group h-full">
       <Card className="relative overflow-hidden transition-all duration-150 hover:-translate-y-1 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:border-red-500/50 bg-black border-zinc-800 h-full">
-
-        {/* Background member image */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden mix-blend-lighten">
-           {/* eslint-disable-next-line @next/next/no-img-element */}
-           <img src={bgImage} alt="" className="w-full h-full object-cover object-top opacity-30 group-hover:opacity-50 transition-opacity duration-500 animate-smoke" />
-        </div>
 
         {/* Decorative member number overlay */}
         <div className="absolute top-0 right-0 p-3 opacity-20 font-mono text-4xl font-black italic tracking-tighter pointer-events-none group-hover:text-red-500 group-hover:opacity-40 transition-colors z-0">
@@ -89,9 +77,9 @@ function MemberCard({ member }: { member: Member }) {
 
         <CardContent className="relative z-10 flex flex-col justify-between gap-4 p-5 h-full">
           <div className="flex items-start justify-between">
-            <Avatar className={cn("h-14 w-14 rounded-md border-b-2 border-r-2 border-zinc-800 shadow-xl", avatarColor)}>
-              <AvatarImage src={member.photoUrl} alt={name} className="object-cover" />
-              <AvatarFallback className="rounded-none bg-transparent font-bold">
+            <Avatar className="h-14 w-14 overflow-hidden rounded-md border-b-2 border-r-2 border-zinc-800 shadow-xl after:rounded-md">
+              <AvatarImage src={member.photoUrl} alt={name} className="rounded-md object-cover" />
+              <AvatarFallback className={cn("rounded-md font-bold", avatarColor)}>
                 {name.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -100,18 +88,7 @@ function MemberCard({ member }: { member: Member }) {
 
           <div className="flex flex-col gap-2 mt-4">
             <div className="flex flex-col gap-1">
-              <h3 className="font-bold text-lg leading-tight truncate pr-8 drop-shadow-md text-white">{name}</h3>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-zinc-300 uppercase drop-shadow-md">
-                  {id ? id : "NO ID"}
-                </span>
-                <span className="font-mono text-[10px] bg-zinc-900/80 px-2 py-0.5 text-zinc-300 border border-zinc-700 backdrop-blur-sm">
-                  BATCH {member.batch ? member.batch : "N/A"}
-                </span>
-              </div>
-              <p className="text-xs text-zinc-400 truncate">
-                {member.teamName ? `Team: ${member.teamName}` : "No team yet"}
-              </p>
+              <h3 className="line-clamp-2 break-words pr-8 text-lg font-bold leading-tight text-white drop-shadow-md" title={name}>{name}</h3>
             </div>
 
             {visibleTech.length > 0 && (
@@ -154,91 +131,76 @@ function Section({ title, count, members }: { title: string; count: number; memb
   );
 }
 
-export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) {
-  const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<UserRole | "all">("all");
+const ROLE_TABS: { value: UserRole | "all"; label: string }[] = [
+  { value: "all", label: "ALL" },
+  { value: "lead", label: "DEPARTMENT LEADS" },
+  { value: "senior", label: "SENIOR MEMBERS" },
+  { value: "fresher", label: "JUNIOR MEMBERS" },
+];
 
-  const filteredMembers = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return initialMembers.filter((m) => {
-      const matchesSearch =
-        q === "" ||
-        m.name.toLowerCase().includes(q) ||
-        (m.email?.toLowerCase().includes(q) ?? false) ||
-        (m.techStack?.some((t) => t.toLowerCase().includes(q)) ?? false);
-      const matchesRole = activeTab === "all" || m.role === activeTab;
-      return matchesSearch && matchesRole;
-    });
-  }, [initialMembers, search, activeTab]);
-
-  const leads = filteredMembers.filter(m => m.role === "lead");
-  const seniors = filteredMembers.filter(m => m.role === "senior");
-  const freshers = filteredMembers.filter(m => m.role === "fresher");
+export function DirectoryView({
+  members,
+  total,
+  role,
+  params,
+  pagination,
+}: {
+  members: Member[];
+  total: number;
+  role: UserRole | "all";
+  params: SearchParams;
+  pagination: ReactNode;
+}) {
+  const leads = members.filter((m) => m.role === "lead");
+  const seniors = members.filter((m) => m.role === "senior");
+  const freshers = members.filter((m) => m.role === "fresher");
 
   return (
     <div className="relative space-y-8 pb-12 min-h-[calc(100vh-2rem)]">
       {/* Decorative background */}
-      <div className="absolute inset-0 z-0 pointer-events-none -mx-8 -mt-8 -mb-12 overflow-hidden rounded-xl bg-black">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/bg.jpeg" alt="" className="w-full h-full object-cover opacity-30 mix-blend-screen" />
+      {/* overflow-clip (not hidden) so the sticky logo layer can pin to the viewport while cards scroll */}
+      <div className="absolute inset-0 z-0 pointer-events-none -mx-8 -mt-8 -mb-12 overflow-clip rounded-xl bg-black">
+        <div className="sticky top-0 flex h-screen items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/mic-logo.png" alt="" className="w-[min(70%,48rem)] select-none opacity-[0.5]" />
+        </div>
       </div>
 
       <div className="flex flex-col gap-1 relative z-10 pt-4 px-2">
         <div className="flex items-center gap-3">
           <h1 className="text-3xl font-black italic tracking-tighter uppercase font-mono">Members</h1>
-          <span className="bg-red-500 text-white font-mono text-xs px-2 py-0.5 rounded-sm">{initialMembers.length} MEMBERS</span>
+          <span className="bg-red-500 text-white font-mono text-xs px-2 py-0.5 rounded-sm">{total} MEMBERS</span>
         </div>
         <p className="text-sm text-zinc-400">Find members of the MIC Development Department.</p>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-zinc-900/50 p-2 rounded-lg border border-zinc-800 relative z-10 px-2">
-        <div className="relative w-full sm:max-w-xs">
-          <Input
-            type="search"
-            placeholder="Search by name, email or technology..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-black border-zinc-700 font-mono focus-visible:ring-red-500"
-          />
-        </div>
+        <SearchBox placeholder="Search by name, email or technology..." />
 
-        <div className="flex flex-wrap items-center gap-1">
-          <Button
-            variant={activeTab === "all" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("all")}
-            className={cn("font-mono text-xs rounded-md", activeTab === "all" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
-          >
-            ALL
-          </Button>
-          <Button
-            variant={activeTab === "lead" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("lead")}
-            className={cn("font-mono text-xs rounded-md", activeTab === "lead" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
-          >
-            TEAM LEADS
-          </Button>
-          <Button
-            variant={activeTab === "senior" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("senior")}
-            className={cn("font-mono text-xs rounded-md", activeTab === "senior" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
-          >
-            SENIOR MEMBERS
-          </Button>
-          <Button
-            variant={activeTab === "fresher" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("fresher")}
-            className={cn("font-mono text-xs rounded-md", activeTab === "fresher" ? "bg-red-600 hover:bg-red-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800")}
-          >
-            JUNIOR MEMBERS
-          </Button>
-        </div>
+        <nav aria-label="Filter by role" className="flex flex-wrap items-center gap-1">
+          {ROLE_TABS.map((tab) => {
+            const active = role === tab.value;
+            return (
+              <Link
+                key={tab.value}
+                href={buildHref("/dashboard/directory", params, {
+                  role: tab.value === "all" ? undefined : tab.value,
+                  page: undefined,
+                })}
+                aria-current={active ? "true" : undefined}
+                className={cn(
+                  "inline-flex h-7 items-center rounded-md px-2.5 font-mono text-xs transition-colors",
+                  active ? "bg-red-600 text-white hover:bg-red-700" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                )}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
-      {filteredMembers.length === 0 ? (
+      {members.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-800 rounded-xl bg-zinc-950 relative z-10 mx-2">
           <div className="text-4xl mb-4">🏁</div>
           <h3 className="font-mono text-xl text-zinc-300 uppercase tracking-widest font-bold">No members found</h3>
@@ -246,9 +208,10 @@ export function DirectoryView({ initialMembers }: { initialMembers: Member[] }) 
         </div>
       ) : (
         <div className="space-y-12 relative z-10 px-2">
-          <Section title="Team Leads" count={leads.length} members={leads} />
+          <Section title="Department Leads" count={leads.length} members={leads} />
           <Section title="Senior Members" count={seniors.length} members={seniors} />
           <Section title="Junior Members" count={freshers.length} members={freshers} />
+          {pagination}
         </div>
       )}
     </div>

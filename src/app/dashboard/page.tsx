@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/dal";
-import { getMemberProfile } from "@/lib/data/users";
-import { getMyTeam } from "@/lib/data/teams";
+import { getGapToNext, getMemberProfile } from "@/lib/data/users";
+import { getMyTeam, TEAM_MAX_MEMBERS } from "@/lib/data/teams";
 import { getProjectForTeam } from "@/lib/data/projects";
 import { getDepartmentSnapshot } from "@/lib/data/dashboard";
 import { getMemberActivity } from "@/lib/data/activity";
@@ -16,9 +16,10 @@ export default async function DashboardPage() {
 
   const team = await getMyTeam(profile.teamId);
   const project = team ? await getProjectForTeam(team._id) : null;
-  const [snapshot, activity] = await Promise.all([
+  const [snapshot, activity, gapToNext] = await Promise.all([
     getDepartmentSnapshot(),
     getMemberActivity(team, project),
+    getGapToNext(profile.points),
   ]);
 
   return (
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
       />
 
       <div className="bg-background px-4 py-8 md:px-8">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           <DashboardOverview
             profile={{
               name: profile.name,
@@ -48,10 +49,22 @@ export default async function DashboardPage() {
               points: profile.points,
               rank: profile.rank,
             }}
-            team={team ? { name: team.name, isLeader: team.leaderId === String(user._id) } : null}
+            team={
+              team
+                ? {
+                    name: team.name,
+                    isLeader: team.leaderId === String(user._id),
+                    memberCount: team.members.length,
+                    maxMembers: TEAM_MAX_MEMBERS,
+                    points: team.points,
+                  }
+                : null
+            }
             project={project ? { title: project.title, status: project.status } : null}
             snapshot={snapshot}
             activity={activity}
+            gapToNext={gapToNext}
+            totalDrivers={snapshot.members}
           />
         </div>
       </div>

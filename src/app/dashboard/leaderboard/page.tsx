@@ -1,4 +1,6 @@
-import { getLeaderboard } from "@/lib/data/users";
+import { getLeaderboard, getLeaderboardPage, getUserRank } from "@/lib/data/users";
+import { parsePage } from "@/lib/list-params";
+import { Pagination } from "@/components/list/pagination";
 import { requireUser } from "@/lib/dal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RoleBadge } from "@/components/role-badge";
@@ -41,35 +43,42 @@ function PodiumStep({ entry, isMe }: { entry: Entry; isMe: boolean }) {
   );
 }
 
-export default async function LeaderboardPage() {
-  const [leaderboard, me] = await Promise.all([getLeaderboard(), requireUser()]);
-  const leaderPoints = leaderboard[0]?.points ?? 0;
-  const podium = leaderboard.slice(0, 3);
+const PAGE_SIZE = 25;
+
+export default async function LeaderboardPage({ searchParams }: PageProps<"/dashboard/leaderboard">) {
+  const params = await searchParams;
+  const me = await requireUser();
+  const requestedPage = parsePage(params.page);
+  const [{ entries: leaderboard, total }, podium, myRank] = await Promise.all([
+    getLeaderboardPage(requestedPage, PAGE_SIZE),
+    getLeaderboard(3),
+    getUserRank(me),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = Math.min(requestedPage, totalPages);
+  const leaderPoints = podium[0]?.points ?? 0;
   // Display order on the podium: P2, P1, P3
   const podiumOrder = [podium[1], podium[0], podium[2]].filter(Boolean) as Entry[];
-  const myEntry = leaderboard.find((e) => String(e._id) === String(me._id));
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="page-title">Leaderboard</h1>
-          <p className="text-sm text-muted-foreground">Department standings · {leaderboard.length} drivers</p>
+          <p className="text-sm text-muted-foreground">Department standings · {total} drivers</p>
         </div>
-        {myEntry && (
-          <div className="surface flex items-center gap-4 px-4 py-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Your position</span>
-            <span className="font-condensed text-2xl font-extrabold italic text-primary">P{myEntry.rank}</span>
-            <span className="font-mono text-sm tabular-nums">{myEntry.points} pts</span>
-          </div>
-        )}
+        <div className="surface flex items-center gap-4 px-4 py-2">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Your position</span>
+          <span className="font-condensed text-2xl font-extrabold italic text-primary">P{myRank}</span>
+          <span className="font-mono text-sm tabular-nums">{me.points} pts</span>
+        </div>
       </div>
 
-      {leaderboard.length === 0 ? (
+      {total === 0 ? (
         <p className="text-sm text-muted-foreground">No standings yet.</p>
       ) : (
         <>
-          {/* Podium */}
+          {/* Podium (always the overall top three, regardless of page) */}
           <section className="surface px-4 pt-8 sm:px-10">
             <div className="mx-auto flex max-w-2xl items-end gap-3 sm:gap-6">
               {podiumOrder.map((entry) => (
@@ -136,6 +145,14 @@ export default async function LeaderboardPage() {
               })}
             </ol>
           </section>
+          <Pagination
+            path="/dashboard/leaderboard"
+            params={params}
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={PAGE_SIZE}
+          />
         </>
       )}
     </div>
