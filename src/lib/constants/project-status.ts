@@ -10,6 +10,9 @@ export const PROJECT_STATUSES = [
 ] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
+// Statuses visible on the public Projects showcase: anything past approval.
+export const SHOWCASE_STATUSES: readonly ProjectStatus[] = ["approved", "in_progress", "completed"];
+
 // Lifecycle order (excludes the "changes_requested" side-state, which maps
 // back onto "approved" for progress purposes — see getProjectProgressPercent).
 const PROJECT_STATUS_ORDER = ["submitted", "under_review", "approved", "in_progress", "completed"] as const;

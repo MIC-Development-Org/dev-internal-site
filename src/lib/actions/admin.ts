@@ -11,6 +11,7 @@ import { SettingsModel, SETTINGS_SINGLETON_ID } from "@/models/Settings";
 import { deleteTeamCascade } from "@/lib/data/teams";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionState } from "@/lib/actions/team";
+import { parseHttpUrl } from "@/lib/url";
 
 export async function setUserRole(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   const admin = await requireAdmin();
@@ -281,14 +282,18 @@ export async function adminEditProject(_prevState: ActionState, formData: FormDa
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
-  const repoUrl = String(formData.get("repoUrl") ?? "").trim();
-  const liveUrl = String(formData.get("liveUrl") ?? "").trim();
+  const rawRepoUrl = String(formData.get("repoUrl") ?? "").trim();
+  const rawLiveUrl = String(formData.get("liveUrl") ?? "").trim();
+  const repoUrl = rawRepoUrl ? parseHttpUrl(rawRepoUrl) : "";
+  const liveUrl = rawLiveUrl ? parseHttpUrl(rawLiveUrl) : "";
   const status = String(formData.get("status") ?? "submitted") as ProjectStatus;
   const newTeamId = String(formData.get("teamId") ?? "").trim() || null;
 
   if (!projectId) return { error: "Project ID is required." };
   if (!title || !description) return { error: "Title and description are required." };
   if (!PROJECT_STATUSES.includes(status)) return { error: "Invalid project status." };
+  if (repoUrl === null) return { error: "Repository URL must start with http:// or https://." };
+  if (liveUrl === null) return { error: "Live URL must start with http:// or https://." };
 
   const project = await ProjectModel.findById(projectId);
   if (!project) return { error: "Project not found." };

@@ -2,6 +2,7 @@ import "server-only";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ProjectModel, type ProjectStatus } from "@/models/Project";
 import { TeamModel } from "@/models/Team";
+import { SHOWCASE_STATUSES } from "@/lib/constants/project-status";
 
 export async function getProjectForTeam(teamId: string) {
   await connectToDatabase();
@@ -15,8 +16,8 @@ export async function getProjectById(id: string) {
 
 export async function getShowcaseProjects(filter?: { status?: ProjectStatus; tech?: string }) {
   await connectToDatabase();
-  const query: Record<string, unknown> = { status: { $in: ["approved", "completed"] } };
-  if (filter?.status && ["approved", "completed"].includes(filter.status)) {
+  const query: Record<string, unknown> = { status: { $in: SHOWCASE_STATUSES } };
+  if (filter?.status && SHOWCASE_STATUSES.includes(filter.status)) {
     query.status = filter.status;
   }
   if (filter?.tech) {

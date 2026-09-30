@@ -6,6 +6,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { TeamModel } from "@/models/Team";
 import { ProjectModel } from "@/models/Project";
 import type { ActionState } from "@/lib/actions/team";
+import { parseGithubRepoUrl, parseHttpUrl } from "@/lib/url";
 
 /**
  * Claim an available pool project for the user's team.
@@ -67,20 +68,28 @@ export async function updateProjectGithub(_prevState: ActionState, formData: For
   const project = await ProjectModel.findById(team.projectId);
   if (!project) return { error: "Project not found." };
 
-  const repoUrl = String(formData.get("repoUrl") ?? "").trim();
-  const liveUrl = String(formData.get("liveUrl") ?? "").trim();
+  const rawRepoUrl = String(formData.get("repoUrl") ?? "").trim();
+  const rawLiveUrl = String(formData.get("liveUrl") ?? "").trim();
   const techStackRaw = String(formData.get("techStack") ?? "");
   const techStack = techStackRaw
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
 
-  if (!repoUrl) {
+  if (!rawRepoUrl) {
     return { error: "GitHub repository URL is required." };
+  }
+  const repoUrl = parseGithubRepoUrl(rawRepoUrl);
+  if (!repoUrl) {
+    return { error: "Enter a GitHub repository URL like https://github.com/owner/repo." };
+  }
+  const liveUrl = rawLiveUrl ? parseHttpUrl(rawLiveUrl) : "";
+  if (liveUrl === null) {
+    return { error: "Live deployment URL must start with http:// or https://." };
   }
 
   project.repoUrl = repoUrl;
-  if (liveUrl !== undefined) project.liveUrl = liveUrl;
+  project.liveUrl = liveUrl;
   if (techStack.length > 0) project.techStack = techStack;
 
   await project.save();
