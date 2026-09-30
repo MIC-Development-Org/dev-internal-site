@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { awardPoints } from "@/lib/actions/admin";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FieldError } from "@/components/field-error";
 import { SubmitButton } from "@/components/submit-button";
 import type { PointsTargetType } from "@/models/PointsLog";
 
@@ -18,7 +19,7 @@ export function AwardPointsForm({ users, teams }: { users: Target[]; teams: Targ
   const [reason, setReason] = useState("");
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
+    if (state.error && !state.fieldErrors) toast.error(state.error);
     if (state.success) {
       toast.success("Points awarded.");
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -82,11 +83,14 @@ export function AwardPointsForm({ users, teams }: { users: Target[]; teams: Targ
         <Input
           id="amount"
           name="amount"
+          aria-invalid={Boolean(state.fieldErrors?.amount)}
+          aria-describedby={state.fieldErrors?.amount ? "amount-error" : undefined}
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
         />
+        <FieldError id="amount" message={state.fieldErrors?.amount} />
       </div>
 
       <div className="space-y-1.5">
@@ -94,11 +98,14 @@ export function AwardPointsForm({ users, teams }: { users: Target[]; teams: Targ
         <Input
           id="reason"
           name="reason"
+          aria-invalid={Boolean(state.fieldErrors?.reason)}
+          aria-describedby={state.fieldErrors?.reason ? "reason-error" : undefined}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="e.g. hackathon-win, missed-standup"
           required
         />
+        <FieldError id="reason" message={state.fieldErrors?.reason} />
       </div>
 
       <SubmitButton pendingLabel="Awarding...">Apply</SubmitButton>

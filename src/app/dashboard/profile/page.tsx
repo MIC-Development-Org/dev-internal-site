@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/role-badge";
 import { PodiumBadge } from "@/components/f1/podium-badge";
 import { ProfileEditForm } from "@/components/dashboard/profile-edit-form";
+import { safeHref } from "@/lib/url";
 
 export default async function ProfilePage() {
   const user = await requireUser();
@@ -66,7 +67,7 @@ export default async function ProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {profile.portfolioUrl && (
                   <Button
-                    render={<a href={profile.portfolioUrl} target="_blank" rel="noreferrer" />}
+                    render={<a href={safeHref(profile.portfolioUrl) ?? "#"} target="_blank" rel="noreferrer" />}
                     nativeButton={false}
                     variant="outline"
                     size="sm"
@@ -76,7 +77,7 @@ export default async function ProfilePage() {
                 )}
                 {profile.linkedinUrl && (
                   <Button
-                    render={<a href={profile.linkedinUrl} target="_blank" rel="noreferrer" />}
+                    render={<a href={safeHref(profile.linkedinUrl) ?? "#"} target="_blank" rel="noreferrer" />}
                     nativeButton={false}
                     variant="outline"
                     size="sm"
@@ -86,7 +87,7 @@ export default async function ProfilePage() {
                 )}
                 {profile.githubUrl && (
                   <Button
-                    render={<a href={profile.githubUrl} target="_blank" rel="noreferrer" />}
+                    render={<a href={safeHref(profile.githubUrl) ?? "#"} target="_blank" rel="noreferrer" />}
                     nativeButton={false}
                     variant="outline"
                     size="sm"

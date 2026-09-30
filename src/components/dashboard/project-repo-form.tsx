@@ -6,6 +6,7 @@ import { Globe, Code2, Save } from "lucide-react";
 import { updateProjectGithub } from "@/lib/actions/project";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FieldError } from "@/components/field-error";
 import { SubmitButton } from "@/components/submit-button";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -42,7 +43,7 @@ export function ProjectRepoForm({ defaults }: ProjectRepoFormProps) {
   const [techStack, setTechStack] = useState(defaults?.techStack?.join(", ") ?? "");
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
+    if (state.error && !state.fieldErrors) toast.error(state.error);
     if (state.success) toast.success("Repository links saved successfully.");
   }, [state]);
 
@@ -56,6 +57,8 @@ export function ProjectRepoForm({ defaults }: ProjectRepoFormProps) {
         <Input
           id="repoUrl"
           name="repoUrl"
+          aria-invalid={Boolean(state.fieldErrors?.repoUrl)}
+          aria-describedby={state.fieldErrors?.repoUrl ? "repoUrl-error" : undefined}
           type="url"
           value={repoUrl}
           onChange={(e) => setRepoUrl(e.target.value)}
@@ -63,6 +66,7 @@ export function ProjectRepoForm({ defaults }: ProjectRepoFormProps) {
           required
           className="font-mono text-xs"
         />
+        <FieldError id="repoUrl" message={state.fieldErrors?.repoUrl} />
         <p className="text-[11px] text-muted-foreground">
           Provide the GitHub repository link where your team is developing this project.
         </p>
@@ -76,12 +80,15 @@ export function ProjectRepoForm({ defaults }: ProjectRepoFormProps) {
         <Input
           id="liveUrl"
           name="liveUrl"
+          aria-invalid={Boolean(state.fieldErrors?.liveUrl)}
+          aria-describedby={state.fieldErrors?.liveUrl ? "liveUrl-error" : undefined}
           type="url"
           value={liveUrl}
           onChange={(e) => setLiveUrl(e.target.value)}
           placeholder="https://your-project.vercel.app"
           className="font-mono text-xs"
         />
+        <FieldError id="liveUrl" message={state.fieldErrors?.liveUrl} />
       </div>
 
       <div className="space-y-1.5">
@@ -92,11 +99,14 @@ export function ProjectRepoForm({ defaults }: ProjectRepoFormProps) {
         <Input
           id="techStack"
           name="techStack"
+          aria-invalid={Boolean(state.fieldErrors?.techStack)}
+          aria-describedby={state.fieldErrors?.techStack ? "techStack-error" : undefined}
           value={techStack}
           onChange={(e) => setTechStack(e.target.value)}
           placeholder="Next.js, TypeScript, Tailwind CSS, PostgreSQL"
           className="text-xs"
         />
+        <FieldError id="techStack" message={state.fieldErrors?.techStack} />
       </div>
 
       <div className="pt-1">

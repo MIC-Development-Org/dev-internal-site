@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { updateProjectStatus } from "@/lib/actions/admin";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FieldError } from "@/components/field-error";
 import { SubmitButton } from "@/components/submit-button";
 import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/constants/project-status";
 
@@ -14,7 +15,7 @@ export function ProjectStatusForm({ projectId, status }: { projectId: string; st
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
+    if (state.error && !state.fieldErrors) toast.error(state.error);
     if (state.success) {
       toast.success("Project updated.");
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -42,8 +43,17 @@ export function ProjectStatusForm({ projectId, status }: { projectId: string; st
         </select>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="note">Feedback note (optional, visible to the team)</Label>
-        <Textarea id="note" name="note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+        <Label htmlFor="note">Feedback note (visible to the team; required when requesting changes)</Label>
+        <Textarea
+          id="note"
+          name="note"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          aria-invalid={Boolean(state.fieldErrors?.note)}
+          aria-describedby={state.fieldErrors?.note ? "note-error" : undefined}
+        />
+        <FieldError id="note" message={state.fieldErrors?.note} />
       </div>
       <SubmitButton pendingLabel="Updating...">Update project</SubmitButton>
     </form>
