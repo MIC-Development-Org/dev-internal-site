@@ -11,6 +11,8 @@ const teamSchema = new Schema(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
+teamSchema.index({ projectId: 1 });
+
 export type Team = InferSchemaType<typeof teamSchema> & { _id: import("mongoose").Types.ObjectId };
 
 export const TeamModel: Model<Team> = models.Team ?? model<Team>("Team", teamSchema);

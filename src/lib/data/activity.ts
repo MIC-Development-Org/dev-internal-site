@@ -27,7 +27,10 @@ export async function getMemberActivity(
   if (project) {
     entries.push({ label: "Project submitted", at: project.createdAt });
     for (const feedback of project.feedback) {
-      entries.push({ label: "Changes requested on your project", at: feedback.at });
+      entries.push({
+        label: feedback.author === "team" ? "Project resubmitted for review" : "Changes requested on your project",
+        at: feedback.at,
+      });
     }
     if (project.status === "approved") entries.push({ label: "Project approved", at: project.updatedAt });
     if (project.status === "in_progress") entries.push({ label: "Project moved to in progress", at: project.updatedAt });

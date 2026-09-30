@@ -21,6 +21,9 @@ const userSchema = new Schema(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
+userSchema.index({ teamId: 1 });
+userSchema.index({ points: -1, name: 1 });
+
 export type User = InferSchemaType<typeof userSchema> & { _id: import("mongoose").Types.ObjectId };
 
 export const UserModel: Model<User> = models.User ?? model<User>("User", userSchema);

@@ -24,11 +24,7 @@ export type TeamWithMembers = {
 
 const MEMBER_PROJECTION = "_id name email photoUrl role batch";
 
-async function hydrateTeam(team: Team): Promise<TeamWithMembers> {
-  const members = await UserModel.find({ _id: { $in: team.memberIds } })
-    .select(MEMBER_PROJECTION)
-    .lean<TeamMember[]>();
-
+function toTeamWithMembers(team: Team, members: TeamMember[]): TeamWithMembers {
   return {
     _id: String(team._id),
     name: team.name,
@@ -41,26 +37,44 @@ async function hydrateTeam(team: Team): Promise<TeamWithMembers> {
   };
 }
 
+/** Hydrates many teams with a single user query (avoids one query per team). */
+async function hydrateTeams(teams: Team[]): Promise<TeamWithMembers[]> {
+  const allMemberIds = teams.flatMap((t) => t.memberIds);
+  const users = await UserModel.find({ _id: { $in: allMemberIds } })
+    .select(MEMBER_PROJECTION)
+    .lean<TeamMember[]>();
+  const userById = new Map(users.map((u) => [String(u._id), u]));
+
+  return teams.map((team) =>
+    toTeamWithMembers(
+      team,
+      team.memberIds.map((id) => userById.get(String(id))).filter((u): u is TeamMember => Boolean(u))
+    )
+  );
+}
+
 /** Only returns the requesting user's own team — never another team's roster. */
 export async function getMyTeam(teamId: string | null): Promise<TeamWithMembers | null> {
   if (!teamId) return null;
   await connectToDatabase();
   const team = await TeamModel.findById(teamId).lean();
   if (!team) return null;
-  return hydrateTeam(team);
+  const [hydrated] = await hydrateTeams([team]);
+  return hydrated;
 }
 
 export async function getAllTeams(): Promise<TeamWithMembers[]> {
   await connectToDatabase();
   const teams = await TeamModel.find().sort({ createdAt: -1 }).lean();
-  return Promise.all(teams.map(hydrateTeam));
+  return hydrateTeams(teams);
 }
 
 export async function getTeamById(teamId: string): Promise<TeamWithMembers | null> {
   await connectToDatabase();
   const team = await TeamModel.findById(teamId).lean();
   if (!team) return null;
-  return hydrateTeam(team);
+  const [hydrated] = await hydrateTeams([team]);
+  return hydrated;
 }
 
 export async function getUnassignedMembers(): Promise<TeamMember[]> {
@@ -72,9 +86,13 @@ export function countSeniors(members: { role: string }[]) {
   return members.filter((m) => m.role === "senior").length;
 }
 
+/**
+ * Dissolves a team: members become unassigned and its project returns to the
+ * unclaimed pool (project data and review feedback are preserved, not deleted).
+ */
 export async function deleteTeamCascade(teamId: string) {
   await connectToDatabase();
   await UserModel.updateMany({ teamId }, { $set: { teamId: null } });
-  await ProjectModel.deleteMany({ teamId });
+  await ProjectModel.updateMany({ teamId }, { $set: { teamId: null } });
   await TeamModel.findByIdAndDelete(teamId);
 }

@@ -14,6 +14,8 @@ const pointsLogSchema = new Schema(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
+pointsLogSchema.index({ targetType: 1, targetId: 1, createdAt: -1 });
+
 export type PointsLog = InferSchemaType<typeof pointsLogSchema> & { _id: import("mongoose").Types.ObjectId };
 
 export const PointsLogModel: Model<PointsLog> =
