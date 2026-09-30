@@ -6,7 +6,7 @@ import { setUserRole } from "@/lib/actions/admin";
 import { USER_ROLES, type UserRole } from "@/lib/constants/roles";
 
 const ROLE_LABELS: Record<UserRole, string> = {
-  lead: "Team Lead",
+  lead: "Department Lead",
   senior: "Senior Member",
   fresher: "Junior Member",
 };
