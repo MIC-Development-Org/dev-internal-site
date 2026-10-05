@@ -4,10 +4,25 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { HeroBackgroundVideo } from "@/components/f1/hero-background-video";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await auth();
   if (session?.user) {
     redirect("/dashboard");
+  }
+
+  const { error } = await searchParams;
+
+  let errorMessage: string | null = null;
+  if (error === "AccessDenied") {
+    errorMessage = "Access Denied: Only @vitstudent.ac.in email addresses are permitted.";
+  } else if (error === "Configuration") {
+    errorMessage = "Configuration Error: Missing GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, or NEXTAUTH_SECRET.";
+  } else if (error) {
+    errorMessage = `Sign-in failed (${error}). Please try again.`;
   }
 
   return (
@@ -54,6 +69,12 @@ export default async function Home() {
             Sign in with your VIT student email to get started.
           </p>
         </div>
+
+        {errorMessage && (
+          <div className="max-w-md rounded-lg border border-red-500/40 bg-red-950/70 px-4 py-3 text-xs text-red-200 shadow-lg backdrop-blur-md">
+            ⚠️ {errorMessage}
+          </div>
+        )}
 
         <form
           action={async () => {

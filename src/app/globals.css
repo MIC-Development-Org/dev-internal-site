@@ -390,6 +390,7 @@
 /* Raised glass-carbon panel with a red top edge. */
 @utility surface {
   position: relative;
+  overflow: hidden;
   background:
     linear-gradient(180deg, oklch(1 0 0 / 0.045), oklch(1 0 0 / 0) 40%),
     var(--card);
