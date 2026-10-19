@@ -29,7 +29,7 @@ export function DashboardNavbar({
 
   return (
     <header className="absolute inset-x-0 top-0 z-20">
-      <div className="flex h-16 items-center justify-between px-6 md:px-10">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 md:px-10">
         <Link href="/dashboard" aria-label="MIC dashboard" className="flex items-center">
           <Image
             src="/mic-logo.png"
@@ -79,7 +79,7 @@ export function DashboardNavbar({
       </div>
 
       {open && (
-        <div className="bg-black px-6 py-4 lg:hidden">
+        <div className="bg-black px-4 py-4 sm:px-6 lg:hidden">
           <nav className="flex flex-col gap-3">
             {navItems.map((item) => (
               <Link

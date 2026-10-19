@@ -128,7 +128,7 @@ export function DashboardOverview({
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="grid gap-4 lg:grid-cols-3">
       {/* DRIVER CARD */}
-      <motion.section variants={item} className="surface relative overflow-hidden p-6 lg:col-span-2">
+      <motion.section variants={item} className="surface relative overflow-hidden p-4 sm:p-6 lg:col-span-2">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-50"
@@ -145,7 +145,7 @@ export function DashboardOverview({
           </Avatar>
           <div className="min-w-0 flex-1 space-y-1.5">
             <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Driver</p>
-            <h2 className="truncate font-condensed text-3xl font-bold uppercase leading-none tracking-wide">{profile.name}</h2>
+            <h2 className="truncate font-condensed text-2xl font-bold sm:text-3xl uppercase leading-none tracking-wide">{profile.name}</h2>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <RoleBadge role={profile.role} />
               <span>{profile.teamName ?? "No team yet"}</span>
@@ -154,22 +154,22 @@ export function DashboardOverview({
         </div>
 
         <dl className="relative mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
-          <div className="bg-card/90 px-4 py-3">
+          <div className="bg-card/90 px-2.5 py-3 sm:px-4">
             <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Position</dt>
-            <dd className="font-condensed text-4xl font-extrabold italic leading-tight">
+            <dd className="font-condensed text-3xl font-extrabold italic sm:text-4xl leading-tight">
               P{profile.rank}
               <span className="ml-1 text-base font-semibold not-italic text-muted-foreground">/{totalDrivers}</span>
             </dd>
           </div>
-          <div className="bg-card/90 px-4 py-3">
+          <div className="bg-card/90 px-2.5 py-3 sm:px-4">
             <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Points</dt>
-            <dd className="font-condensed text-4xl font-extrabold italic tabular-nums leading-tight text-primary">{points}</dd>
+            <dd className="font-condensed text-3xl font-extrabold italic sm:text-4xl tabular-nums leading-tight text-primary">{points}</dd>
           </div>
-          <div className="bg-card/90 px-4 py-3">
+          <div className="bg-card/90 px-2.5 py-3 sm:px-4">
             <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
               {gapToNext === null ? "Status" : "Gap to car ahead"}
             </dt>
-            <dd className="font-condensed text-4xl font-extrabold italic tabular-nums leading-tight">
+            <dd className="font-condensed text-3xl font-extrabold italic sm:text-4xl tabular-nums leading-tight">
               {gapToNext === null ? <span className="text-amber-400">Leader</span> : `+${gapToNext}`}
             </dd>
           </div>
@@ -179,7 +179,7 @@ export function DashboardOverview({
       {/* RACE ENGINEER / NEXT STEP */}
       <motion.section
         variants={item}
-        className="relative flex flex-col justify-between overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent p-6 shadow-[0_0_40px_-16px_var(--primary)]"
+        className="relative flex flex-col justify-between overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent p-4 shadow-[0_0_40px_-16px_var(--primary)] sm:p-6"
       >
         <div>
           <PanelTitle icon={<Radio className="size-3.5 animate-pulse" />}>Race engineer</PanelTitle>
@@ -192,7 +192,7 @@ export function DashboardOverview({
       </motion.section>
 
       {/* PROJECT PROGRESS */}
-      <motion.section variants={item} className="surface p-6 lg:col-span-2">
+      <motion.section variants={item} className="surface p-4 sm:p-6 lg:col-span-2">
         <PanelTitle
           icon={<Gauge className="size-3.5" />}
           action={project && <ProjectStatusBadge status={project.status} />}
@@ -205,7 +205,7 @@ export function DashboardOverview({
               <p className="truncate font-condensed text-2xl font-bold uppercase tracking-wide group-hover:text-primary">
                 {project.title}
               </p>
-              <p className="font-condensed text-4xl font-extrabold italic tabular-nums leading-none">
+              <p className="font-condensed text-3xl font-extrabold italic sm:text-4xl tabular-nums leading-none">
                 {progress}
                 <span className="text-xl text-muted-foreground">%</span>
               </p>
@@ -220,7 +220,7 @@ export function DashboardOverview({
       </motion.section>
 
       {/* TEAM */}
-      <motion.section variants={item} className="surface flex flex-col p-6">
+      <motion.section variants={item} className="surface flex flex-col p-4 sm:p-6">
         <PanelTitle icon={<Users className="size-3.5" />}>Team</PanelTitle>
         {team ? (
           <Link href="/dashboard/team" className="group flex flex-1 flex-col justify-between gap-4">
@@ -257,7 +257,7 @@ export function DashboardOverview({
       </motion.section>
 
       {/* TELEMETRY */}
-      <motion.section variants={item} className="surface p-6">
+      <motion.section variants={item} className="surface p-4 sm:p-6">
         <PanelTitle icon={<Gauge className="size-3.5" />}>Department telemetry</PanelTitle>
         <dl className="grid grid-cols-2 gap-4">
           {telemetry.map((t) => (
@@ -270,7 +270,7 @@ export function DashboardOverview({
       </motion.section>
 
       {/* ACTIVITY */}
-      <motion.section variants={item} className="surface p-6 lg:col-span-2">
+      <motion.section variants={item} className="surface p-4 sm:p-6 lg:col-span-2">
         <PanelTitle icon={<ActivityIcon className="size-3.5" />}>Lap log</PanelTitle>
         {activity.length === 0 ? (
           <p className="text-sm text-muted-foreground">No activity yet.</p>

@@ -103,7 +103,7 @@ export default async function TeamPage() {
             maskImage: "linear-gradient(to left, black, transparent)",
           }}
         />
-        <div className="relative space-y-6 p-6">
+        <div className="relative space-y-6 p-4 sm:p-6">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Team garage</p>
             <h1 className="page-title mt-1">{team.name}</h1>

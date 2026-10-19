@@ -62,7 +62,7 @@ export function DashboardHero({
 
       <DashboardNavbar navItems={navItems} userName={userName} signOutAction={signOutAction} />
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-4 px-4 text-center sm:px-6">
         <p className="text-label-caps text-white/70">MIC Development Department</p>
         <h1 className="text-headline-xl text-balance text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.85)]">
           Hiii, {firstName}.

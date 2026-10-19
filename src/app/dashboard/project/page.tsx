@@ -121,7 +121,7 @@ export default async function ProjectPage() {
             maskImage: "linear-gradient(to left, black, transparent)",
           }}
         />
-        <div className="relative space-y-6 p-6">
+        <div className="relative space-y-6 p-4 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-widest text-primary">
@@ -138,7 +138,7 @@ export default async function ProjectPage() {
           {/* Lap strip */}
           <div className="space-y-2">
             <div className="flex items-baseline justify-between gap-4">
-              <p className="font-condensed text-5xl font-extrabold italic tabular-nums leading-none">
+              <p className="font-condensed text-4xl font-extrabold sm:text-5xl italic tabular-nums leading-none">
                 {progress}
                 <span className="text-2xl text-muted-foreground">%</span>
               </p>

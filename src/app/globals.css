@@ -200,15 +200,22 @@
   }
   html {
     @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    overflow-x: clip;
+  }
+  img, video, svg {
+    max-width: 100%;
   }
 }
 
 /* Typography scale (design tokens) */
 @utility text-headline-xl {
   font-family: var(--font-condensed);
-  font-size: 48px;
+  font-size: clamp(32px, 9vw, 48px);
   font-weight: 800;
-  line-height: 52px;
+  line-height: 1.08;
   letter-spacing: 0.05em;
 }
 @utility text-headline-xl-mobile {
@@ -220,9 +227,9 @@
 }
 @utility text-headline-lg {
   font-family: var(--font-condensed);
-  font-size: 32px;
+  font-size: clamp(24px, 6vw, 32px);
   font-weight: 700;
-  line-height: 36px;
+  line-height: 1.15;
   letter-spacing: 0.04em;
 }
 @utility text-headline-lg-mobile {
@@ -348,7 +355,7 @@
 /* Page title: condensed caps with a red pit-lane tick. */
 @utility page-title {
   font-family: var(--font-condensed);
-  font-size: 34px;
+  font-size: clamp(26px, 7vw, 34px);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: 0.03em;
